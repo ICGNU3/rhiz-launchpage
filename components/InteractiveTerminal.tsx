@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
 import TypewriterText from './TypewriterText'
 
 interface TerminalLine {
@@ -10,11 +10,30 @@ interface TerminalLine {
   delay?: number
 }
 
-export const InteractiveTerminal = () => {
+export interface InteractiveTerminalRef {
+  focus: () => void
+  scrollIntoView: (options?: ScrollIntoViewOptions) => void
+}
+
+export const InteractiveTerminal = forwardRef<InteractiveTerminalRef>((props, ref) => {
   const [lines, setLines] = useState<TerminalLine[]>([])
   const [currentInput, setCurrentInput] = useState('')
   const [isActive, setIsActive] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // Expose methods to parent component
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      if (inputRef.current) {
+        inputRef.current.focus()
+      }
+    },
+    scrollIntoView: (options?: ScrollIntoViewOptions) => {
+      if (inputRef.current) {
+        inputRef.current.scrollIntoView(options)
+      }
+    }
+  }), [])
 
   const initialSequence: TerminalLine[] = [
     { id: '1', text: '> INITIALIZING RELATIONAL_OS...', type: 'command', delay: 0 },
@@ -199,6 +218,8 @@ export const InteractiveTerminal = () => {
       </div>
     </div>
   )
-}
+})
+
+InteractiveTerminal.displayName = 'InteractiveTerminal'
 
 export default InteractiveTerminal

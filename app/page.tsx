@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
 import TypewriterText from '../components/TypewriterText'
-import InteractiveTerminal from '../components/InteractiveTerminal'
+import InteractiveTerminal, { InteractiveTerminalRef } from '../components/InteractiveTerminal'
 import ElevenLabsWidget from '../components/ElevenLabsWidget'
 
 // Synergy Discovery Component
@@ -226,6 +226,10 @@ export default function Home() {
   const [synergyScore] = useState(0)
   const [depthScore, setDepthScore] = useState(0)
   
+  // Add refs for DOM elements
+  const installButtonRef = useRef<HTMLButtonElement>(null)
+  const terminalInputRef = useRef<InteractiveTerminalRef>(null)
+  
   // Add a stable key for React reconciliation
   const componentKey = useMemo(() => 'home-component', [])
   
@@ -361,19 +365,25 @@ export default function Home() {
       if (e.ctrlKey && e.key === 'i') {
         e.preventDefault()
         // Focus the main CTA button
-        const installButton = document.querySelector('[data-action="install"]') as HTMLElement
-        if (installButton && installButton.focus) {
-          installButton.focus()
-          installButton.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        try {
+          if (installButtonRef.current) {
+            installButtonRef.current.focus()
+            installButtonRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          }
+        } catch (error) {
+          console.warn('Focus error:', error)
         }
       }
       if (e.ctrlKey && e.key === 't') {
         e.preventDefault()
         // Focus the interactive terminal
-        const terminalInput = document.querySelector('.interactive-terminal input') as HTMLElement
-        if (terminalInput && terminalInput.focus) {
-          terminalInput.focus()
-          terminalInput.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        try {
+          if (terminalInputRef.current) {
+            terminalInputRef.current.focus()
+            terminalInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          }
+        } catch (error) {
+          console.warn('Focus error:', error)
         }
       }
     }
@@ -446,7 +456,7 @@ export default function Home() {
             {/* Left Panel - Interactive Terminal */}
             <div className="lg:col-span-2 space-y-6">
               <OSTerminal>
-                <InteractiveTerminal />
+                <InteractiveTerminal ref={terminalInputRef} />
               </OSTerminal>
               
               {/* Quick System Status */}
@@ -467,6 +477,7 @@ export default function Home() {
               {/* Primary CTA */}
               <div className="text-center lg:text-left">
                 <button 
+                  ref={installButtonRef}
                   type="button" 
                   data-action="install"
                   className="button-glow bg-synergy-gold text-os-dark px-12 py-6 font-bold text-xl hover:bg-synergy-light transition-all focus:ring-2 focus:ring-synergy-light focus:ring-offset-2 focus:ring-offset-os-dark"
