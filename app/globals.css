@@ -2,7 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
 html {
   scroll-behavior: smooth;
@@ -10,6 +12,36 @@ html {
 
 body {
   font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+  background-color: #0A0F14;
+  color: #E0E6ED;
+  position: relative;
+}
+
+/* CRT Screen Effects */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 255, 255, 0.03) 2px,
+      rgba(0, 255, 255, 0.03) 4px
+    );
+  pointer-events: none;
+  z-index: 1000;
+  animation: scanlines 0.1s linear infinite;
+}
+
+@keyframes scanlines {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(4px); }
 }
 
 @layer utilities {
@@ -17,15 +49,246 @@ body {
     text-wrap: balance;
   }
   
-  .gradient-text {
-    @apply bg-gradient-to-r from-primary-600 to-accent-500 bg-clip-text text-transparent;
+  /* Relational OS Typography */
+  .os-mono {
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: -0.02em;
   }
   
-  .premium-border {
-    @apply border border-gray-200 bg-white/50 backdrop-blur-sm;
+  .os-interface {
+    font-family: 'Space Grotesk', sans-serif;
   }
   
-  .premium-shadow {
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  /* Screen Light Text */
+  .screen-light {
+    color: #00FFFF;
+    text-shadow: 
+      0 0 5px #00FFFF,
+      0 0 10px #00FFFF40;
+  }
+  
+  /* Button Glow (Subtle) */
+  .button-glow {
+    box-shadow: 
+      0 0 15px rgba(255, 215, 0, 0.2),
+      0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .button-glow:hover {
+    box-shadow: 
+      0 0 20px rgba(255, 215, 0, 0.3),
+      0 6px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Data Stream */
+  .data-stream {
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(0, 255, 136, 0.1) 50%,
+      transparent 100%
+    );
+    animation: data-flow 2s linear infinite;
+  }
+  
+  @keyframes data-flow {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+  
+  /* OS Window */
+  .os-window {
+    background: linear-gradient(
+      135deg,
+      rgba(10, 15, 20, 0.95) 0%,
+      rgba(20, 30, 40, 0.95) 100%
+    );
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    box-shadow: 
+      0 0 40px rgba(0, 255, 255, 0.1),
+      inset 0 0 20px rgba(0, 255, 255, 0.05);
+    position: relative;
+  }
+  
+  /* CRT Curvature Effect */
+  .os-window::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      ellipse at center,
+      transparent 0%,
+      transparent 85%,
+      rgba(0, 0, 0, 0.1) 100%
+    );
+    pointer-events: none;
+  }
+  
+  /* Depth Scanner */
+  .depth-scanner {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .scan-line {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(0, 255, 255, 0.8) 50%,
+      transparent 100%
+    );
+    animation: depth-scan 3s linear infinite;
+  }
+  
+  @keyframes depth-scan {
+    0% { transform: translateY(-100px); }
+    100% { transform: translateY(100px); }
+  }
+  
+  /* Connection Pulse */
+  .connection-pulse {
+    animation: connection-heartbeat 1.5s ease-in-out infinite;
+  }
+  
+  @keyframes connection-heartbeat {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+  }
+  
+  /* Neural Network Lines */
+  .neural-line {
+    stroke: rgba(255, 215, 0, 0.6);
+    stroke-width: 2;
+    fill: none;
+    stroke-dasharray: 5, 5;
+    animation: neural-flow 3s linear infinite;
+  }
+  
+  @keyframes neural-flow {
+    0% { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: -10; }
+  }
+  
+  /* OS Grid Background */
+  .os-grid {
+    background-image: 
+      linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+  
+  /* Interface Borders */
+  .interface-border {
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    position: relative;
+  }
+  
+  .interface-border::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(0, 255, 255, 0.6) 50%,
+      transparent 100%
+    );
+    animation: border-glow 3s linear infinite;
+  }
+  
+  @keyframes border-glow {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  
+  /* Compatibility Meter */
+  .compatibility-ring {
+    stroke-dasharray: 314;
+    stroke-dashoffset: calc(314 - (314 * var(--compatibility)) / 100);
+    transition: stroke-dashoffset 1s ease-in-out;
+  }
+  
+  /* Terminal Cursor */
+  .terminal-cursor::after {
+    content: '▊';
+    animation: terminal-blink 1s infinite;
+    color: #00FF88;
+  }
+  
+  @keyframes terminal-blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+  
+  /* Typewriter Effect */
+  .typewriter {
+    overflow: hidden;
+    border-right: 2px solid #00FF88;
+    white-space: nowrap;
+    animation: typewriter-cursor 1s infinite;
+  }
+  
+  @keyframes typewriter-cursor {
+    0%, 50% { border-color: #00FF88; }
+    51%, 100% { border-color: transparent; }
+  }
+  
+  /* Screen Flicker */
+  .screen-flicker {
+    animation: screen-flicker 8s infinite;
+  }
+  
+  @keyframes screen-flicker {
+    0%, 98% { opacity: 1; }
+    99% { opacity: 0.98; }
+    100% { opacity: 1; }
+  }
+  
+  /* Sticky CTA */
+  .sticky-cta {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .sticky-cta.visible {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  
+  /* Loading States */
+  .loading-dots::after {
+    content: '';
+    animation: loading-dots 1.5s infinite;
+  }
+  
+  @keyframes loading-dots {
+    0% { content: ''; }
+    25% { content: '.'; }
+    50% { content: '..'; }
+    75% { content: '...'; }
+    100% { content: ''; }
+  }
+  
+  /* Phosphor Persistence */
+  .phosphor-text {
+    text-shadow: 
+      0 0 2px currentColor,
+      0 0 4px currentColor;
+    filter: blur(0.5px);
   }
 }

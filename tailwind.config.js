@@ -8,53 +8,88 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          900: '#0c4a6e',
+        os: {
+          dark: '#0A0F14',
+          darker: '#050A0F',
+          light: '#E0E6ED',
+          border: '#1B2733',
         },
-        accent: {
-          400: '#fbbf24',
-          500: '#f59e0b',
-          600: '#d97706',
+        synergy: {
+          gold: '#FFD700',
+          light: '#FFED4E',
+          dark: '#B8860B',
         },
-        gray: {
-          50: '#f9fafb',
-          100: '#f3f4f6',
-          200: '#e5e7eb',
-          300: '#d1d5db',
-          400: '#9ca3af',
-          500: '#6b7280',
-          600: '#4b5563',
-          700: '#374151',
-          800: '#1f2937',
-          900: '#111827',
+        depth: {
+          blue: '#0080FF',
+          cyan: '#00FFFF',
+          light: '#40B0FF',
+        },
+        connection: {
+          green: '#00FF88',
+          light: '#40FFB0',
+          dark: '#00CC66',
+        },
+        alert: {
+          magenta: '#FF00FF',
+          purple: '#9D00FF',
+          pink: '#FF00AA',
+        },
+        interface: {
+          gray: '#4A5568',
+          light: '#718096',
+          dark: '#2D3748',
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        'mono': ['JetBrains Mono', 'monospace'],
+        'interface': ['Space Grotesk', 'sans-serif'],
+        'system': ['Inter', 'sans-serif'],
       },
       animation: {
-        'fade-in': 'fadeIn 0.5s ease-in-out',
-        'slide-up': 'slideUp 0.5s ease-out',
-        'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
+        'typewriter': 'typewriter 4s steps(40, end)',
+        'blink': 'blink 1s infinite',
+        'stamp-appear': 'stampAppear 0.5s ease-out',
+        'folder-lift': 'folderLift 0.3s ease-out',
+        'paper-shuffle': 'paperShuffle 0.4s ease-in-out',
       },
       keyframes: {
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
+        typewriter: {
+          'from': { width: '0' },
+          'to': { width: '100%' },
         },
-        slideUp: {
-          '0%': { transform: 'translateY(20px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
+        blink: {
+          '0%, 50%': { opacity: '1' },
+          '51%, 100%': { opacity: '0' },
         },
-        pulseGlow: {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(234, 179, 8, 0.5)' },
-          '50%': { boxShadow: '0 0 40px rgba(234, 179, 8, 0.8)' },
+        stampAppear: {
+          '0%': { 
+            transform: 'scale(0) rotate(-10deg)',
+            opacity: '0'
+          },
+          '50%': { 
+            transform: 'scale(1.1) rotate(-5deg)',
+            opacity: '0.8'
+          },
+          '100%': { 
+            transform: 'scale(1) rotate(-3deg)',
+            opacity: '1'
+          },
         },
+        folderLift: {
+          '0%': { transform: 'translateY(0px) rotate(0deg)' },
+          '100%': { transform: 'translateY(-8px) rotate(2deg)' },
+        },
+        paperShuffle: {
+          '0%': { transform: 'translateX(0px) rotate(0deg)' },
+          '25%': { transform: 'translateX(-5px) rotate(-1deg)' },
+          '75%': { transform: 'translateX(5px) rotate(1deg)' },
+          '100%': { transform: 'translateX(0px) rotate(0deg)' },
+        },
+      },
+      spacing: {
+        '18': '4.5rem',
+        '88': '22rem',
+        '128': '32rem',
       },
     },
   },
