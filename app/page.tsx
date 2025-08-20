@@ -250,20 +250,17 @@ export default function Home() {
     {
       title: "DEPTH_SCANNER.exe",
       description: "Analyzes relationship depth beyond surface interactions",
-      metrics: "Depth increased 3.2x average",
-      icon: "📊"
+      metrics: "Depth increased 3.2x average"
     },
     {
       title: "SYNERGY_FINDER.exe",
       description: "Discovers hidden connection opportunities in your network",
-      metrics: "$2.4M opportunity value detected",
-      icon: "🔍"
+      metrics: "$2.4M opportunity value detected"
     },
     {
       title: "MEMORY_ENHANCE.exe",
       description: "Perfect recall of every interaction and context",
-      metrics: "0% relationship data loss",
-      icon: "🧠"
+      metrics: "0% relationship data loss"
     }
   ], [])
   
@@ -578,7 +575,7 @@ export default function Home() {
                 transition={{ delay: index * 0.1 }}
                 className="os-window p-4"
               >
-                <div className="text-3xl mb-3">{feature.icon}</div>
+
                 <h3 className="font-mono text-synergy-gold mb-2 text-lg">{feature.title}</h3>
                 <p className="text-os-light mb-3 leading-relaxed">{feature.description}</p>
                 <div className="text-sm font-mono text-connection-green">
