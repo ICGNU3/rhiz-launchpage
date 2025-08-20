@@ -1,482 +1,801 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { Clock, Users, Star, ArrowRight, CheckCircle, Zap, Crown, Gift, Shield, TrendingUp, MessageCircle, Calendar } from 'lucide-react'
+import TypewriterText from '../components/TypewriterText'
+import InteractiveTerminal from '../components/InteractiveTerminal'
+import ElevenLabsWidget from '../components/ElevenLabsWidget'
 
-const NetworkDiagram = () => {
-  const [animationStep, setAnimationStep] = useState(0)
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setAnimationStep((prev) => (prev + 1) % 4)
-    }, 2000)
-    return () => clearInterval(interval)
+// Synergy Discovery Component
+const SynergyMatrix = ({ connections }: { connections: any[] }) => {
+  const [hoveredNode, setHoveredNode] = useState<number | null>(null)
+  
+  const handleNodeHover = useCallback((index: number | null) => {
+    setHoveredNode(index)
   }, [])
 
   return (
-    <div className="relative w-full h-64 flex items-center justify-center">
-      {/* Central Root Alpha Node */}
-      <motion.div
-        className="absolute w-16 h-16 bg-gradient-to-r from-accent-500 to-accent-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg z-10"
-        animate={{ scale: animationStep === 0 ? 1.1 : 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        <Crown className="w-6 h-6" />
-      </motion.div>
-      
-      {/* First Ring - 5 immediate invites */}
-      {[0, 1, 2, 3, 4].map((i) => {
-        const angle = (i * 72) - 90 // -90 to start from top
-        const radius = 80
-        const x = Math.cos((angle * Math.PI) / 180) * radius
-        const y = Math.sin((angle * Math.PI) / 180) * radius
-        
-        return (
-          <motion.div key={`ring1-${i}`} className="absolute">
-            {/* Connection Line */}
-            <motion.div
-              className="absolute w-px bg-gradient-to-r from-accent-300 to-primary-300"
-              style={{
-                height: `${radius}px`,
-                transformOrigin: 'bottom center',
-                transform: `rotate(${angle + 90}deg)`,
-                left: '50%',
-                top: '50%',
-                marginLeft: '-0.5px',
-                marginTop: `-${radius}px`
-              }}
-              initial={{ scaleY: 0 }}
-              animate={{ scaleY: animationStep >= 1 ? 1 : 0 }}
-              transition={{ duration: 0.8, delay: i * 0.1 }}
+    <div className="relative h-64 w-full">
+      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 200">
+        {/* Neural Network Visualization */}
+        {connections.map((_, i) => (
+          <g key={i}>
+            <line
+              x1={50 + i * 100}
+              y1="100"
+              x2={150 + i * 100}
+              y2={50 + i * 30}
+              className="neural-line"
             />
-            
-            {/* Node */}
-            <motion.div
-              className="w-10 h-10 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white shadow-md"
-              style={{
-                left: `calc(50% + ${x}px - 20px)`,
-                top: `calc(50% + ${y}px - 20px)`
-              }}
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ 
-                scale: animationStep >= 1 ? 1 : 0,
-                opacity: animationStep >= 1 ? 1 : 0
-              }}
-              transition={{ duration: 0.5, delay: 0.5 + i * 0.1 }}
-            >
-              <Users className="w-4 h-4" />
-            </motion.div>
-          </motion.div>
-        )
-      })}
-
-      {/* Second Ring - 15 secondary invites (3 per first ring node) */}
-      {[0, 1, 2, 3, 4].map((parentIndex) => 
-        [0, 1, 2].map((childIndex) => {
-          const parentAngle = (parentIndex * 72) - 90
-          const childOffset = (childIndex - 1) * 25 // spread children around parent
-          const angle = parentAngle + childOffset
-          const radius = 140
-          const x = Math.cos((angle * Math.PI) / 180) * radius
-          const y = Math.sin((angle * Math.PI) / 180) * radius
-          const key = `ring2-${parentIndex}-${childIndex}`
-          
-          return (
-            <motion.div key={key} className="absolute">
-              {/* Connection Line to Parent */}
-              <motion.div
-                className="absolute w-px bg-gradient-to-r from-primary-200 to-purple-200"
-                style={{
-                  height: '60px',
-                  transformOrigin: 'bottom center',
-                  transform: `rotate(${angle + 90}deg)`,
-                  left: `calc(50% + ${Math.cos((parentAngle * Math.PI) / 180) * 80}px)`,
-                  top: `calc(50% + ${Math.sin((parentAngle * Math.PI) / 180) * 80}px)`,
-                  marginLeft: '-0.5px'
-                }}
-                initial={{ scaleY: 0 }}
-                animate={{ scaleY: animationStep >= 2 ? 1 : 0 }}
-                transition={{ duration: 0.6, delay: parentIndex * 0.1 + childIndex * 0.05 }}
-              />
-              
-              {/* Node */}
-              <motion.div
-                className="w-6 h-6 bg-gradient-to-r from-purple-400 to-purple-500 rounded-full shadow-sm"
-                style={{
-                  left: `calc(50% + ${x}px - 12px)`,
-                  top: `calc(50% + ${y}px - 12px)`
-                }}
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ 
-                  scale: animationStep >= 2 ? 1 : 0,
-                  opacity: animationStep >= 2 ? 1 : 0
-                }}
-                transition={{ duration: 0.4, delay: 1.5 + parentIndex * 0.1 + childIndex * 0.05 }}
-              />
-            </motion.div>
-          )
-        })
-      )}
-
-      {/* Growth Indicator */}
-      <motion.div
-        className="absolute bottom-0 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 font-medium"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: animationStep >= 3 ? 1 : 0 }}
-        transition={{ duration: 0.5, delay: 3 }}
-      >
-        1 → 10 → 1,500+ Network Growth
-      </motion.div>
-
-      {/* Legend */}
-      <div className="absolute top-0 right-0 text-xs space-y-1">
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 bg-gradient-to-r from-accent-500 to-accent-600 rounded-full"></div>
-          <span className="text-gray-600">Root Alpha</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full"></div>
-          <span className="text-gray-600">Beta Invites</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 bg-gradient-to-r from-purple-400 to-purple-500 rounded-full"></div>
-          <span className="text-gray-600">Network Growth</span>
+            <circle
+              cx={150 + i * 100}
+              cy={50 + i * 30}
+              r="6"
+              fill="#FFD700"
+              className="connection-pulse cursor-pointer hover:r-8 transition-all"
+              onMouseEnter={() => handleNodeHover(i)}
+              onMouseLeave={() => handleNodeHover(null)}
+            />
+            {hoveredNode === i && (
+              <foreignObject x={120 + i * 100} y={20 + i * 30} width="100" height="40">
+                <div className="bg-os-darker p-2 rounded text-xs text-synergy-gold border border-synergy-gold">
+                  Connection {i + 1}
+                  <br />
+                  Value: $847K
+                </div>
+              </foreignObject>
+            )}
+          </g>
+        ))}
+      </svg>
+      
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-synergy-gold text-2xl font-mono mb-2">
+            SYNERGY DETECTED
+          </div>
+          <div className="text-depth-cyan text-sm">
+            3 high-value connections identified
+          </div>
         </div>
       </div>
     </div>
   )
 }
 
-export default function Home() {
-  const [spotsRemaining, setSpotsRemaining] = useState(73)
-  const [recentMembers] = useState([
-    { name: 'Sarah from San Francisco', spot: 77 },
-    { name: 'Michael from New York', spot: 76 },
-    { name: 'David from Austin', spot: 75 },
-  ])
+// Depth Scanner Component
+const DepthScanner = ({ depth }: { depth: number }) => {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  const [isScanning, setIsScanning] = useState(false)
+  
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    try {
+      const rect = e.currentTarget.getBoundingClientRect()
+      setMousePos({
+        x: ((e.clientX - rect.left) / rect.width) * 100,
+        y: ((e.clientY - rect.top) / rect.height) * 100
+      })
+    } catch (error) {
+      console.warn('Mouse move handler error:', error)
+    }
+  }, [])
+  
+  const handleScanningState = useCallback((scanning: boolean) => {
+    setIsScanning(scanning)
+  }, [])
+
 
   return (
-    <div className="min-h-screen bg-black relative font-mono text-green-400">
-      {/* Terminal Grid Background */}
-      <div className="fixed inset-0 opacity-5" style={{
-        backgroundImage: `
-          linear-gradient(rgba(34, 211, 238, 0.1) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(34, 211, 238, 0.1) 1px, transparent 1px)
-        `,
-        backgroundSize: '20px 20px'
-      }}></div>
+    <div 
+      className="depth-scanner h-32 relative bg-os-darker rounded overflow-hidden cursor-crosshair"
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => handleScanningState(true)}
+      onMouseLeave={() => handleScanningState(false)}
+    >
+      <div className="scan-line"></div>
       
-      {/* Matrix Rain Effect */}
-      <div className="fixed inset-0 pointer-events-none">
-        {[...Array(50)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute text-electric-400 opacity-20 animate-pulse"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              fontSize: '10px',
-              fontFamily: 'JetBrains Mono'
-            }}
-          >
-            {Math.random() > 0.5 ? '01' : '10'}
+      {/* Interactive Crosshair */}
+      {isScanning && (
+        <>
+          <div 
+            className="absolute w-full h-px bg-depth-cyan opacity-50"
+            style={{ top: `${mousePos.y}%` }}
+          />
+          <div 
+            className="absolute h-full w-px bg-depth-cyan opacity-50"
+            style={{ left: `${mousePos.x}%` }}
+          />
+        </>
+      )}
+      
+      <div className="flex items-center justify-between p-4">
+        <span className="text-depth-cyan font-mono text-sm">
+          DEPTH ANALYSIS {isScanning && <span className="loading-dots"></span>}
+        </span>
+        <div className="flex items-center gap-3">
+          <div className="w-32 bg-os-dark rounded-full h-2">
+            <motion.div 
+              className="bg-gradient-to-r from-depth-blue to-depth-cyan h-2 rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${depth}%` }}
+              transition={{ duration: 1.5, ease: "easeOut" }}
+            />
           </div>
-        ))}
-      </div>
-      
-      {/* Terminal Status Bar */}
-      <div className="fixed top-0 w-full bg-black border-b border-electric-500/50 text-electric-400 py-1 z-50 font-mono text-xs">
-        <div className="flex justify-between px-4">
-          <span>rhiz@quantum-lab:~/relationship_physics$ </span>
-          <span className="animate-pulse">FIELD_STRENGTH: {Math.round((150 - spotsRemaining) / 150 * 100)}% | ENTROPY: RISING ■■■□□</span>
+          <span className="text-depth-cyan font-mono">{depth}%</span>
         </div>
       </div>
+      
+      {isScanning && (
+        <div className="absolute bottom-2 left-4 text-xs text-depth-cyan font-mono">
+          SCANNING: X{mousePos.x.toFixed(0)} Y{mousePos.y.toFixed(0)}
+        </div>
+      )}
+    </div>
+  )
+}
 
-      {/* Terminal Interface - Revolutionary Layout */}
-      <section className="pt-8 px-4 relative min-h-screen">
-        {/* Split Screen Layout - Terminal + GUI */}
-        <div className="grid lg:grid-cols-12 gap-8 h-screen">
+// OS Terminal Component
+const OSTerminal = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <div className="os-window rounded-lg overflow-hidden">
+      <div className="bg-os-darker px-4 py-2 flex items-center justify-between border-b border-os-border">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-red-500"></div>
+          <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+          <div className="w-3 h-3 rounded-full bg-green-500"></div>
+        </div>
+        <div className="font-mono text-xs text-interface-light">
+          RHIZ://RELATIONAL_OS.v150
+        </div>
+        <div className="text-xs text-connection-green font-mono">
+          ● CONNECTED
+        </div>
+      </div>
+      <div className="p-6">
+        {children}
+      </div>
+    </div>
+  )
+}
+
+// Sticky CTA Component
+const StickyCTA = ({ spotsRemaining }: { spotsRemaining: number }) => {
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      try {
+        const scrollY = window.scrollY
+        setIsVisible(scrollY > 800)
+      } catch (error) {
+        console.warn('Scroll handler error:', error)
+      }
+    }
+
+    // Check if window is available (client-side only)
+    if (typeof window !== 'undefined') {
+      window.addEventListener('scroll', handleScroll)
+      return () => {
+        try {
+          window.removeEventListener('scroll', handleScroll)
+        } catch (error) {
+          console.warn('Cleanup error:', error)
+        }
+      }
+    }
+  }, [])
+
+  return (
+    <div className={`sticky-cta ${isVisible ? 'visible' : ''}`}>
+      <div className="bg-synergy-gold text-os-dark px-6 py-3 rounded-lg shadow-lg">
+        <div className="text-sm font-bold">
+          {spotsRemaining} LICENSES LEFT
+        </div>
+        <button type="button" className="text-xs underline hover:no-underline">
+          INSTALL NOW →
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// Progress Indicator
+const ProgressIndicator = ({ spotsRemaining }: { spotsRemaining: number }) => {
+  const progress = ((150 - spotsRemaining) / 150) * 100
+
+  return (
+    <div className="fixed top-16 right-4 z-40 bg-os-darker/90 p-3 rounded border border-os-border">
+      <div className="text-xs font-mono text-synergy-gold mb-2">
+        ROOT ALPHA STATUS
+      </div>
+      <div className="w-32 bg-os-dark rounded-full h-2 mb-1">
+        <div 
+          className="bg-synergy-gold h-2 rounded-full transition-all duration-500"
+          style={{ width: `${progress}%` } as React.CSSProperties}
+        />
+      </div>
+      <div className="text-xs text-interface-light">
+        {150 - spotsRemaining}/150 FILLED
+      </div>
+    </div>
+  )
+}
+
+export default function Home() {
+  const [spotsRemaining] = useState(117)
+  const [synergyScore] = useState(0)
+  const [depthScore, setDepthScore] = useState(0)
+  
+  // Add a stable key for React reconciliation
+  const componentKey = useMemo(() => 'home-component', [])
+  
+  // Cleanup effect to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      // Cleanup any potential DOM references
+      try {
+        // This helps prevent DOM manipulation errors during unmounting
+      } catch (error) {
+        console.warn('Cleanup error:', error)
+      }
+    }
+  }, [])
+  
+  // Memoized feature data
+  const features = useMemo(() => [
+    {
+      title: "DEPTH_SCANNER.exe",
+      description: "Analyzes relationship depth beyond surface interactions",
+      metrics: "Depth increased 3.2x average",
+      icon: "📊"
+    },
+    {
+      title: "SYNERGY_FINDER.exe",
+      description: "Discovers hidden connection opportunities in your network",
+      metrics: "$2.4M opportunity value detected",
+      icon: "🔍"
+    },
+    {
+      title: "MEMORY_ENHANCE.exe",
+      description: "Perfect recall of every interaction and context",
+      metrics: "0% relationship data loss",
+      icon: "🧠"
+    }
+  ], [])
+  
+  // Memoized phases data
+  const deploymentPhases = useMemo(() => [
+    {
+      phase: "PHASE_001",
+      title: "ROOT ACCESS",
+      period: "NOW - OCT 20",
+      description: "150 operators maximum. Lifetime kernel access.",
+      status: "ACTIVE",
+      color: "text-connection-green"
+    },
+    {
+      phase: "PHASE_002",
+      title: "BETA KERNEL",
+      period: "OCT 21 - DEC 2025",
+      description: "Invitation-only. 1,500 max capacity.",
+      status: "PENDING",
+      color: "text-depth-cyan"
+    },
+    {
+      phase: "PHASE_003",
+      title: "SYSTEM LOCK",
+      period: "Q1 2026+",
+      description: "Permanent invite-only. Waitlist protocol.",
+      status: "SCHEDULED",
+      color: "text-alert-magenta"
+    }
+  ], [])
+  
+  // Memoized pricing plans
+  const pricingPlans = useMemo(() => [
+    {
+      title: "RELATIONAL OS",
+      subtitle: "ROOT LICENSE",
+      price: "$777",
+      period: "LIFETIME",
+      features: [
+        "Permanent system access",
+        "10 user invitations",
+        "Priority kernel updates",
+        "Direct developer access",
+        "Founding operator status"
+      ],
+      cta: "INSTALL NOW",
+      highlight: true
+    },
+    {
+      title: "FUTURE ACCESS",
+      subtitle: "SUBSCRIPTION",
+      price: "$99",
+      period: "MONTHLY",
+      features: [
+        "$1,188 annually",
+        "No invitation codes",
+        "Standard updates only",
+        "Community support",
+        "Regular user status"
+      ],
+      cta: "NOT AVAILABLE",
+      highlight: false
+    },
+    {
+      title: "ALTERNATIVES",
+      subtitle: "LEGACY SYSTEMS",
+      price: "$60+",
+      period: "MONTHLY",
+      features: [
+        "No relationship OS",
+        "No synergy detection",
+        "No depth analysis",
+        "Manual tracking only",
+        "Data silos"
+      ],
+      cta: "INCOMPATIBLE",
+      highlight: false
+    }
+  ], [])
+  
+  useEffect(() => {
+    // Animate scores on mount
+    const timer = setTimeout(() => {
+      setDepthScore(82)
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Keyboard shortcuts and accessibility
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        // Close any focused elements or reset focus
+        const activeElement = document.activeElement as HTMLElement
+        if (activeElement && activeElement.blur) {
+          activeElement.blur()
+        }
+      }
+      if (e.ctrlKey && e.key === 'i') {
+        e.preventDefault()
+        // Focus the main CTA button
+        const installButton = document.querySelector('[data-action="install"]') as HTMLElement
+        if (installButton && installButton.focus) {
+          installButton.focus()
+          installButton.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      }
+      if (e.ctrlKey && e.key === 't') {
+        e.preventDefault()
+        // Focus the interactive terminal
+        const terminalInput = document.querySelector('.interactive-terminal input') as HTMLElement
+        if (terminalInput && terminalInput.focus) {
+          terminalInput.focus()
+          terminalInput.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [])
+
+  return (
+    <div key={componentKey} className="min-h-screen bg-os-dark os-grid screen-flicker">
+      {/* Progress Indicator */}
+      <ProgressIndicator spotsRemaining={spotsRemaining} />
+      
+      {/* Sticky CTA */}
+      <StickyCTA spotsRemaining={spotsRemaining} />
+
+      {/* OS Status Bar */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-os-darker/95 backdrop-blur-md border-b border-os-border">
+        <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="font-mono text-sm text-synergy-gold">
+              RELATIONAL_OS
+            </div>
+            <div className="text-xs text-interface-light">v.150.ALPHA</div>
+          </div>
           
-          {/* Left Terminal Pane */}
-          <div className="lg:col-span-7 bg-black border border-electric-500/30 p-4 font-mono text-sm overflow-hidden">
-            <div className="flex items-center gap-2 mb-4 text-electric-400">
-              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-              <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              <span className="ml-4 text-xs">relationship_physics_lab.exe</span>
+          <div className="flex items-center gap-6">
+            <div className="text-xs font-mono text-depth-cyan">
+              NETWORK_DEPTH: SCANNING...
             </div>
-            
-            <div className="space-y-2 text-electric-400">
-              <div className="flex">
-                <span className="text-green-400">root@rhiz:</span>
-                <span className="text-white">~$ ./initialize_quantum_entanglement.sh</span>
-              </div>
-              <div className="text-gray-400">[INFO] Loading relationship physics engine...</div>
-              <div className="text-gray-400">[INFO] Scanning quantum field topology...</div>
-              <div className="text-electric-400">[SUCCESS] 150 quantum states discovered</div>
-              <div className="text-gravity-400">[WARNING] {spotsRemaining} states remain stable</div>
-              <div className="text-red-400">[CRITICAL] Wave function collapse imminent</div>
-              <br />
-              <div className="flex">
-                <span className="text-green-400">root@rhiz:</span>
-                <span className="text-white">~$ cat README.md</span>
-              </div>
-              <div className="mt-4 space-y-3 text-gray-300">
-                <div># RHIZ QUANTUM RELATIONSHIP PROTOCOL</div>
-                <div className="text-electric-400">## CLASSIFIED: ROOT ALPHA CLEARANCE ONLY</div>
-                <br />
-                <div>We've cracked the code.</div>
-                <div>Human relationships follow invisible laws of physics.</div>
-                <div>Connection fields. Attraction forces. Network gravity.</div>
-                <br />
-                <div className="text-electric-400">This isn't social networking.</div>
-                <div className="text-electric-400">This is <span className="font-display font-bold">RELATIONSHIP PHYSICS</span>.</div>
-                <br />
-                <div className="animate-pulse">Status: {spotsRemaining}/150 quantum observers remaining</div>
-                <div className="animate-pulse">Price: $777 (single energy transfer)</div>
-                <div className="animate-pulse">Access: LIFETIME | Force multipliers: 10x</div>
-              </div>
+            <div className="text-xs font-mono text-connection-green">
+              SYNERGIES: ACTIVE
             </div>
-          </div>
-
-          {/* Right Data Visualization Pane */}
-          <div className="lg:col-span-5 space-y-4">
-            
-            {/* Network Topology Viewer */}
-            <div className="bg-space-950/50 border border-electric-500/30 p-4 h-64">
-              <div className="text-electric-400 text-xs mb-2 font-mono">NETWORK_TOPOLOGY.VIZ</div>
-              <div className="relative h-full">
-                <svg className="w-full h-full" viewBox="0 0 300 200">
-                  {/* Central Node */}
-                  <circle cx="150" cy="100" r="8" fill="#22d3ee" className="animate-pulse">
-                    <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite" />
-                  </circle>
-                  
-                  {/* Connection Lines */}
-                  {[...Array(8)].map((_, i) => {
-                    const angle = (i * 45) * Math.PI / 180
-                    const x = 150 + Math.cos(angle) * 60
-                    const y = 100 + Math.sin(angle) * 60
-                    return (
-                      <g key={i}>
-                        <line x1="150" y1="100" x2={x} y2={y} stroke="#22d3ee" strokeWidth="1" opacity="0.6" />
-                        <circle cx={x} cy={y} r="4" fill="#a855f7" />
-                      </g>
-                    )
-                  })}
-                </svg>
-                
-                <div className="absolute bottom-2 left-2 text-xs font-mono text-electric-400">
-                  FIELD_STRENGTH: {Math.round((150 - spotsRemaining) / 150 * 100)}%
-                </div>
-              </div>
-            </div>
-
-            {/* Quantum States Monitor */}
-            <div className="bg-space-950/50 border border-electric-500/30 p-4">
-              <div className="text-electric-400 text-xs mb-2 font-mono">QUANTUM_STATES.MON</div>
-              <div className="font-display text-4xl text-electric-400 mb-2">{spotsRemaining}</div>
-              <div className="text-xs text-gray-400 font-mono">AVAILABLE ENTANGLEMENT SLOTS</div>
-              <div className="mt-4 space-y-1">
-                <div className="flex justify-between text-xs font-mono">
-                  <span className="text-gray-400">OCCUPIED:</span>
-                  <span className="text-electric-400">{150 - spotsRemaining}/150</span>
-                </div>
-                <div className="w-full bg-space-800 rounded-full h-2">
-                  <div 
-                    className="bg-gradient-to-r from-electric-500 to-gravity-500 h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${((150 - spotsRemaining) / 150) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Command Prompt */}
-            <div className="bg-space-950/50 border border-electric-500/30 p-4">
-              <div className="text-electric-400 text-xs mb-2 font-mono">ENTANGLEMENT_INTERFACE.CMD</div>
-              <button className="w-full bg-electric-500 hover:bg-electric-400 text-black font-mono font-bold py-3 px-4 transition-all duration-200 transform hover:scale-[1.02] border border-electric-400">
-                {'>> INITIATE_QUANTUM_ENTANGLEMENT($777)'}
-              </button>
-              <div className="text-xs text-gray-400 mt-2 font-mono">
-                WARNING: Irreversible process. Lifetime access granted.
-              </div>
-            </div>
-
-            {/* Recent Activity Log */}
-            <div className="bg-space-950/50 border border-electric-500/30 p-4">
-              <div className="text-electric-400 text-xs mb-2 font-mono">ACTIVITY.LOG</div>
-              <div className="space-y-1 text-xs font-mono">
-                <div className="text-green-400">[√] NODE_77: ENTANGLEMENT_COMPLETE</div>
-                <div className="text-green-400">[√] NODE_76: ENTANGLEMENT_COMPLETE</div>
-                <div className="text-green-400">[√] NODE_75: ENTANGLEMENT_COMPLETE</div>
-                <div className="text-yellow-400">[?] SCANNING FOR NEW OBSERVERS...</div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* Footer Terminal */}
-      <footer className="px-4 py-8 border-t border-electric-500/30">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-black border border-electric-500/30 p-4 font-mono text-xs">
-            <div className="flex items-center gap-2 mb-2 text-electric-400">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span>SYSTEM STATUS: OPERATIONAL</span>
-            </div>
-            <div className="grid md:grid-cols-3 gap-8 text-gray-400">
-              <div>
-                <div className="text-electric-400 mb-2">NETWORK_INFO:</div>
-                <div>• PROTOCOL: Quantum Entanglement</div>
-                <div>• ENCRYPTION: 256-bit relationship hashing</div>
-                <div>• LATENCY: Sub-quantum response time</div>
-              </div>
-              <div>
-                <div className="text-electric-400 mb-2">CONTACT_VECTORS:</div>
-                <div>• TELEGRAM: @rhiz_quantum_lab</div>
-                <div>• EMAIL: root@rhiz.network</div>
-                <div>• IRC: #relationship-physics</div>
-              </div>
-              <div>
-                <div className="text-electric-400 mb-2">LEGAL_FRAMEWORK:</div>
-                <div>• TERMS: Quantum entanglement binding</div>
-                <div>• PRIVACY: Heisenberg uncertainty principle</div>
-                <div>• COPYRIGHT: 2024 Rhiz Quantum Labs</div>
-              </div>
-            </div>
-            <div className="mt-4 pt-4 border-t border-electric-500/30 text-center text-electric-400">
-              {'> END TRANSMISSION <'}
+            <div className="text-xs font-mono text-alert-magenta animate-pulse">
+              {spotsRemaining}/150 LICENSES
             </div>
           </div>
         </div>
-      </footer>
+      </div>
 
-      {/* Quantum Entanglement Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-space-950 to-space-900 text-white relative">
+      {/* Hero Section - Interactive Terminal Interface */}
+      <section className="pt-20 pb-8 px-4 sm:px-6 lg:px-8 relative">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="mb-8 relative"
-            >
-              <div className="orbital-path relative">
-                <div className="inline-block space-border rounded-2xl p-8 mb-8 animate-gravity-well relative z-10">
-                  <div className="text-6xl sm:text-7xl font-bold gradient-text mb-4">
-                    {spotsRemaining}
-                  </div>
-                  <div className="text-xl text-electric-400 font-medium">
-                    Quantum States Available
-                  </div>
-                  <div className="text-sm text-space-400 mt-2">
-                    Field Strength: {Math.round((150 - spotsRemaining) / 150 * 100)}% | Wave Collapse Imminent
-                  </div>
-                </div>
-                
-                {/* Orbiting Elements */}
-                <div className="absolute top-1/2 left-1/2 w-4 h-4 bg-electric-400 rounded-full animate-orbit opacity-60"></div>
-                <div className="absolute top-1/2 left-1/2 w-3 h-3 bg-gravity-400 rounded-full animate-orbit opacity-40" style={{animationDelay: '2s'}}></div>
-              </div>
-            </motion.div>
+          <div className="text-center mb-8">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-4">
+              <TypewriterText 
+                text="RELATIONAL OS" 
+                className="screen-light" 
+                speed={100}
+              />
+            </h1>
+            <div className="text-xl sm:text-2xl text-os-light leading-relaxed mb-6">
+              <TypewriterText 
+                text="The operating system for human relationships."
+                delay={2000}
+                speed={50}
+              />
+              <br/>
+              <TypewriterText 
+                text="Deepen connections. Discover synergies."
+                className="text-synergy-gold font-semibold"
+                delay={4000}
+                speed={40}
+              />
+            </div>
+          </div>
 
-            {/* Quantum Entanglement CTA */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="mb-6"
-            >
-              <button className="bg-gradient-to-r from-electric-500 to-gravity-500 hover:from-electric-400 hover:to-gravity-400 text-white font-bold py-6 px-12 rounded-2xl text-xl transition-all duration-300 transform hover:scale-105 electromagnetic-glow relative overflow-hidden">
-                <span className="relative z-10">Initiate Quantum Entanglement - $777</span>
-                <div className="absolute inset-0 force-field opacity-30"></div>
-                <ArrowRight className="inline-block ml-2 w-5 h-5 relative z-10" />
-              </button>
+          <div className="grid lg:grid-cols-3 gap-8">
+            
+            {/* Left Panel - Interactive Terminal */}
+            <div className="lg:col-span-2 space-y-6">
+              <OSTerminal>
+                <InteractiveTerminal />
+              </OSTerminal>
               
-              <div className="mt-4 text-space-300">
-                Single energy transfer. Permanent field access. <span className="font-semibold text-electric-400">Includes 10 force multipliers.</span>
+              {/* Quick System Status */}
+              <div className="bg-os-darker p-6 rounded-lg border border-os-border">
+                <div className="font-mono text-sm space-y-3">
+                  <div className="text-connection-green">
+                    &gt; SYNERGY_SCAN: <span className="text-synergy-gold font-semibold">3 opportunities detected</span>
+                  </div>
+                  <div className="text-depth-cyan">
+                    &gt; DEPTH_ANALYSIS: <span className="text-os-light">Relationship potential unlocked</span>
+                  </div>
+                  <div className="text-alert-magenta">
+                    &gt; WARNING: <span className="text-os-light">Limited to 150 operators</span>
+                  </div>
+                </div>
               </div>
-            </motion.div>
+              
+              {/* Primary CTA */}
+              <div className="text-center lg:text-left">
+                <button 
+                  type="button" 
+                  data-action="install"
+                  className="button-glow bg-synergy-gold text-os-dark px-12 py-6 font-bold text-xl hover:bg-synergy-light transition-all focus:ring-2 focus:ring-synergy-light focus:ring-offset-2 focus:ring-offset-os-dark"
+                  aria-label="Install Relational OS for $777 lifetime license"
+                >
+                  INSTALL RELATIONAL_OS [$777]
+                </button>
+                <div className="text-sm text-interface-light mt-3">
+                  LIFETIME LICENSE | ROOT ACCESS | 10 USER INVITES
+                </div>
+                <div className="text-xs text-interface-gray mt-2">
+                  Press Ctrl+I to focus | Press Ctrl+T for terminal
+                </div>
+              </div>
+            </div>
 
-            {/* Field Collapse Warning */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              className="space-border rounded-xl p-4 inline-block"
-            >
-              <div className="flex items-center text-electric-400 font-medium">
-                <Zap className="w-5 h-5 mr-2 animate-pulse" />
-                Critical Mass: 150 observers collapse quantum field. Beta phase accessible only through entangled members.
+            {/* Right Panel - Live Visualizations */}
+            <div className="space-y-6">
+              {/* AI Assistant Integration */}
+              <div className="interface-border rounded-lg p-6 bg-os-darker/50">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-mono text-synergy-gold">
+                    AI_ASSISTANT.exe
+                  </h3>
+                  <div className="w-2 h-2 bg-connection-green rounded-full animate-pulse"></div>
+                </div>
+                <div className="text-xs text-interface-light mb-4 space-y-1">
+                  <div>› STATUS: Voice interface active</div>
+                  <div>› CAPABILITY: Relationship intelligence Q&A</div>
+                  <div>› PROTOCOL: Real-time conversation</div>
+                </div>
+                {/* ElevenLabs Conversational AI Widget */}
+                <div className="bg-os-dark rounded p-2 border border-os-border">
+                  <ElevenLabsWidget />
+                </div>
               </div>
-            </motion.div>
+
+              {/* Relationship Depth Scanner */}
+              <div className="interface-border rounded-lg p-6 bg-os-darker/50">
+                <h3 className="text-sm font-mono text-synergy-gold mb-4">
+                  DEPTH_SCANNER.exe
+                </h3>
+                <DepthScanner depth={depthScore} />
+                <div className="mt-4 text-xs text-interface-light">
+                  <div>SCAN RESULT: High-value connection detected</div>
+                  <div>RECOMMENDATION: Immediate engagement advised</div>
+                </div>
+              </div>
+
+              {/* Synergy Discovery Matrix */}
+              <div className="interface-border rounded-lg p-6 bg-os-darker/50">
+                <h3 className="text-sm font-mono text-synergy-gold mb-4">
+                  SYNERGY_MATRIX.exe
+                </h3>
+                <SynergyMatrix connections={[1, 2, 3]} />
+              </div>
+              
+              {/* Live Activity Feed */}
+              <div className="interface-border rounded-lg p-4 bg-os-darker/50">
+                <h3 className="text-sm font-mono text-synergy-gold mb-3">
+                  NETWORK_STATUS.log
+                </h3>
+                <div className="space-y-2 font-mono text-xs">
+                  <div className="text-connection-green">
+                    [CONNECTED] Sarah Chen → You | Compatibility: 94%
+                  </div>
+                  <div className="text-depth-cyan">
+                    [ANALYZING] David Park | Synergy potential: HIGH
+                  </div>
+                  <div className="text-alert-magenta animate-pulse">
+                    [ALERT] Relationship decay detected: 3 contacts
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Relationship Physics Laboratory */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-space-950 to-space-900 text-white relative">
+      {/* Core Features Section */}
+      <section className="py-8 px-4 sm:px-6 lg:px-8 bg-os-darker/50">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16 relative">
-            {/* Background Force Field */}
-            <div className="absolute inset-0 force-field rounded-3xl opacity-20"></div>
-            
-            <h2 className="text-4xl sm:text-5xl font-bold mb-6 relative z-10">
-              Discover <span className="gradient-text">Relationship Physics</span> Laboratory
+          <div className="text-center mb-8">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-3">
+              <span className="screen-light">SYSTEM CAPABILITIES</span>
             </h2>
-            <p className="text-xl text-space-300 max-w-4xl mx-auto leading-relaxed relative z-10">
-              Rhiz applies the fundamental laws of <span className="text-electric-400 font-semibold">social physics</span> to map invisible connection forces, 
-              calculate relationship field strengths, and predict optimal interaction moments across your network topology.
+            <p className="text-lg text-interface-light max-w-3xl mx-auto">
+              Transform how you understand and nurture relationships
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
-            <div>
-              <h3 className="text-3xl font-bold text-white mb-6">Network Entropy & Force Decay</h3>
-              <div className="space-y-4 text-space-300">
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-gravity-400 rounded-full mt-2 animate-pulse"></div>
-                  <p>Connection fields weaken without energy input (forgotten follow-ups)</p>
+          <div className="grid md:grid-cols-3 gap-6">
+            {features.map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="os-window p-4"
+              >
+                <div className="text-3xl mb-3">{feature.icon}</div>
+                <h3 className="font-mono text-synergy-gold mb-2 text-lg">{feature.title}</h3>
+                <p className="text-os-light mb-3 leading-relaxed">{feature.description}</p>
+                <div className="text-sm font-mono text-connection-green">
+                  PERFORMANCE: {feature.metrics}
                 </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-gravity-400 rounded-full mt-2 animate-pulse"></div>
-                  <p>Network topology becomes invisible without mapping algorithms</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <OSTerminal>
+            <div className="space-y-8">
+              <h2 className="text-2xl sm:text-3xl font-bold text-synergy-gold mb-6">
+                SYSTEM_ARCHITECTURE.md
+              </h2>
+              
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="font-mono text-depth-cyan mb-6 text-lg">INPUT_LAYER</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <span className="text-connection-green">►</span>
+                      <div>
+                        <div className="font-bold">Voice Memory Capture</div>
+                        <div className="text-interface-light">"Met Sarah at Stripe, she's hiring engineers..."</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="text-connection-green">►</span>
+                      <div>
+                        <div className="font-bold">Automatic Context Extraction</div>
+                        <div className="text-interface-light">AI identifies key details and opportunities</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-gravity-400 rounded-full mt-2 animate-pulse"></div>
-                  <p>Optimal interaction windows pass undetected in the quantum field</p>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-gravity-400 rounded-full mt-2 animate-pulse"></div>
-                  <p>Relationship potential energy dissipates through thermodynamic neglect</p>
+                
+                <div>
+                  <h3 className="font-mono text-depth-cyan mb-6 text-lg">OUTPUT_LAYER</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <span className="text-synergy-gold">◆</span>
+                      <div>
+                        <div className="font-bold">Synergy Alerts</div>
+                        <div className="text-interface-light">"Connect Sarah with David - perfect timing"</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="text-synergy-gold">◆</span>
+                      <div>
+                        <div className="font-bold">Depth Recommendations</div>
+                        <div className="text-interface-light">"Schedule deeper conversation about API tools"</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-            
-            <div className="relative">
-              <NetworkDiagram />
-            </div>
+          </OSTerminal>
+        </div>
+      </section>
+
+      {/* Exclusivity Timeline */}
+      <section className="py-8 px-4 sm:px-6 lg:px-8 bg-os-darker/50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-3">
+              <span className="screen-light">DEPLOYMENT PHASES</span>
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {deploymentPhases.map((phase, index) => (
+              <div key={index} className="interface-border rounded-lg p-6 bg-os-darker/80">
+                <div className={`font-mono text-xs ${phase.color} mb-2`}>
+                  {phase.phase}
+                </div>
+                <h3 className="text-xl font-bold text-os-light mb-2">{phase.title}</h3>
+                <div className="text-sm text-interface-light mb-3">{phase.period}</div>
+                <p className="text-sm text-os-light mb-4">{phase.description}</p>
+                <div className="inline-block px-3 py-1 bg-os-dark rounded text-xs font-mono border border-os-border">
+                  STATUS: {phase.status}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Comparison */}
+      <section className="py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-3">
+              <span className="screen-light">LICENSE COMPARISON</span>
+            </h2>
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-6">
+            {pricingPlans.map((plan, index) => (
+              <div 
+                key={index} 
+                className={`rounded-lg p-6 ${
+                  plan.highlight 
+                    ? 'synergy-glow bg-os-darker border-2 border-synergy-gold' 
+                    : 'bg-os-darker/50 border border-os-border'
+                }`}
+              >
+                <div className="text-center space-y-4">
+                  <div>
+                    <div className="font-mono text-sm text-interface-light mb-2">
+                      {plan.subtitle}
+                    </div>
+                    <h3 className="text-xl font-bold text-os-light">
+                      {plan.title}
+                    </h3>
+                  </div>
+                  
+                  <div>
+                    <div className="text-4xl font-bold text-synergy-gold mb-2">
+                      {plan.price}
+                    </div>
+                    <div className="text-sm text-interface-light">
+                      {plan.period}
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3 text-left">
+                    {plan.features.map((feature, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <span className={plan.highlight ? 'text-connection-green' : 'text-interface-gray'}>
+                          {plan.highlight ? '✓' : '×'}
+                        </span>
+                        <span className="text-os-light">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <button 
+                    type="button"
+                    className={`w-full py-3 px-4 font-mono font-bold transition-all ${
+                      plan.highlight 
+                        ? 'bg-synergy-gold text-os-dark hover:bg-synergy-light' 
+                        : 'bg-interface-dark text-interface-gray cursor-not-allowed'
+                    }`}
+                    disabled={!plan.highlight}
+                  >
+                    {plan.cta}
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Final CTA */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-900 to-gray-800 text-white">
+      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-os-dark to-os-darker">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl sm:text-5xl font-bold mb-6">
-            Be Part of the <span className="text-accent-400">First 150</span>
+          <div className="inline-block px-6 py-3 bg-alert-magenta/20 border border-alert-magenta rounded-lg mb-8 animate-pulse">
+            <span className="font-mono text-alert-magenta font-semibold">
+              CRITICAL: {spotsRemaining} LICENSES REMAINING
+            </span>
+          </div>
+          
+          <h2 className="text-4xl sm:text-5xl font-bold mb-8 leading-tight">
+            <span className="screen-light">INITIALIZE YOUR RELATIONAL OS</span>
           </h2>
-          <p className="text-xl text-gray-300 mb-8">
-            Join the quantum relationship revolution. Limited to 150 founding members.
+          
+          <p className="text-xl sm:text-2xl text-os-light mb-8 max-w-2xl mx-auto leading-relaxed">
+            Join 150 operators upgrading how humanity connects
           </p>
-          <button className="bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-400 hover:to-accent-500 text-white font-bold py-4 px-8 rounded-lg text-lg transition-all duration-300 transform hover:scale-105">
-            Join Now - $777
-          </button>
+          
+          <div className="space-y-4">
+            <button type="button" className="button-glow bg-synergy-gold text-os-dark px-12 py-6 text-xl font-bold hover:bg-synergy-light transition-all">
+              BEGIN INSTALLATION → $777
+            </button>
+            
+            <div className="text-interface-light">
+              Questions? Contact: israel.wilson@uncommonimpactstudio.com
+            </div>
+          </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="bg-os-darker border-t border-os-border py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-12">
+            <div>
+              <div className="font-mono text-synergy-gold mb-3">SYSTEM_INFO</div>
+              <div className="space-y-1 text-interface-light">
+                <div>Version: 150.ALPHA</div>
+                <div>Kernel: Relational-OS</div>
+                <div>Architecture: Human-First</div>
+              </div>
+            </div>
+            
+            <div>
+              <div className="font-mono text-synergy-gold mb-3">NETWORK_STATUS</div>
+              <div className="space-y-1 text-interface-light">
+                <div>Operators: {150 - spotsRemaining}/150</div>
+                <div>Synergies: Active</div>
+                <div>Depth: Optimizing</div>
+              </div>
+            </div>
+            
+            <div>
+              <div className="font-mono text-synergy-gold mb-3">DOCUMENTATION</div>
+              <div className="space-y-1 text-interface-light">
+                <div>Terms: /legal/terms.md</div>
+                <div>Privacy: /legal/privacy.md</div>
+                <div>© 2024 Relational OS</div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="border-t border-os-border mt-8 pt-6 text-center">
+            <div className="font-mono text-xs text-connection-green">
+              SYSTEM STATUS: OPERATIONAL | UPTIME: 99.99%
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }
