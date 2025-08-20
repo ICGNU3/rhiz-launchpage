@@ -192,7 +192,7 @@ const StickyCTA = ({ spotsRemaining }: { spotsRemaining: number }) => {
           {spotsRemaining} LICENSES LEFT
         </div>
         <button type="button" className="text-xs underline hover:no-underline">
-          INSTALL NOW →
+                          JOIN NOW →
         </button>
       </div>
     </div>
@@ -309,7 +309,7 @@ export default function Home() {
         "Direct developer access",
         "Founding operator status"
       ],
-      cta: "INSTALL NOW",
+      cta: "JOIN NOW",
       highlight: true
     },
     {
@@ -481,9 +481,9 @@ export default function Home() {
                   type="button" 
                   data-action="install"
                   className="button-glow bg-synergy-gold text-os-dark px-12 py-6 font-bold text-xl hover:bg-synergy-light transition-all focus:ring-2 focus:ring-synergy-light focus:ring-offset-2 focus:ring-offset-os-dark"
-                  aria-label="Install Relational OS for $777 lifetime license"
+                  aria-label="Join the first 150 founding members for $777 lifetime license"
                 >
-                  INSTALL RELATIONAL_OS [$777]
+                  JOIN THE FIRST 150 [$777]
                 </button>
                 <div className="text-sm text-interface-light mt-3">
                   LIFETIME LICENSE | ROOT ACCESS | 10 USER INVITES
@@ -758,7 +758,7 @@ export default function Home() {
           
           <div className="space-y-4">
             <button type="button" className="button-glow bg-synergy-gold text-os-dark px-12 py-6 text-xl font-bold hover:bg-synergy-light transition-all">
-              BEGIN INSTALLATION → $777
+              JOIN THE FOUNDING 150 → $777
             </button>
             
             <div className="text-interface-light">
