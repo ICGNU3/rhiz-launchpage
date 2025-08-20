@@ -176,7 +176,7 @@ export const InteractiveTerminal = () => {
       
       {isActive && (
         <div className="flex items-center text-connection-green">
-          <span className="mr-2">></span>
+          <span className="mr-2">{'>'}</span>
           <input
             ref={inputRef}
             type="text"

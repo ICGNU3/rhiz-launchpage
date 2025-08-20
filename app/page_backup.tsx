@@ -297,7 +297,7 @@ export default function Home() {
             <div className="bg-space-950/50 border border-electric-500/30 p-4">
               <div className="text-electric-400 text-xs mb-2 font-mono">ENTANGLEMENT_INTERFACE.CMD</div>
               <button className="w-full bg-electric-500 hover:bg-electric-400 text-black font-mono font-bold py-3 px-4 transition-all duration-200 transform hover:scale-[1.02] border border-electric-400">
-                >> INITIATE_QUANTUM_ENTANGLEMENT($777)
+                {'>>'} INITIATE_QUANTUM_ENTANGLEMENT($777)
               </button>
               <div className="text-xs text-gray-400 mt-2 font-mono">
                 WARNING: Irreversible process. Lifetime access granted.
@@ -348,7 +348,7 @@ export default function Home() {
               </div>
             </div>
             <div className="mt-4 pt-4 border-t border-electric-500/30 text-center text-electric-400">
-              > END TRANSMISSION &lt;
+              {'>'} END TRANSMISSION &lt;
             </div>
           </div>
         </div>
