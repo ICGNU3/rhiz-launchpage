@@ -523,7 +523,7 @@ export default function Home() {
 
         <div className="max-w-7xl mx-auto relative z-10 h-full flex flex-col">
           {/* Floating Status Panels */}
-          <div className="absolute top-4 left-4 right-4 z-20">
+          <div className="absolute top-16 left-4 right-4 z-20">
             <div className="flex justify-between items-start">
               {/* Top Left HUD */}
               <motion.div 
@@ -575,7 +575,7 @@ export default function Home() {
           </div>
           
           {/* Central Command Header */}
-          <div className="text-center mb-8 mt-24 flex-grow flex flex-col justify-center">
+          <div className="text-center mb-8 mt-32 flex-grow flex flex-col justify-center">
             {/* Holographic Title Display */}
             <motion.div 
               className="relative mb-8"
