@@ -67,9 +67,13 @@ export const CustomVoiceInterface = () => {
     setIsProcessing(true)
 
     try {
-      // Here you would integrate with ElevenLabs API
-      // For now, we'll simulate a response
-      const response = await simulateElevenLabsResponse(text)
+      // Generate AI response text
+      const aiResponseText = getFallbackResponse(text)
+      
+      // Use ElevenLabs API for voice synthesis
+      await callElevenLabsAPI(aiResponseText)
+      
+      const response = aiResponseText
       
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -79,14 +83,6 @@ export const CustomVoiceInterface = () => {
       }
 
       setMessages(prev => [...prev, aiMessage])
-      
-      // Speak the response
-      if (synthesisRef.current) {
-        const utterance = new SpeechSynthesisUtterance(response)
-        utterance.rate = 0.9
-        utterance.pitch = 1.1
-        synthesisRef.current.speak(utterance)
-      }
     } catch (error) {
       console.error('Error processing message:', error)
       const errorMessage: Message = {
@@ -102,11 +98,53 @@ export const CustomVoiceInterface = () => {
     }
   }
 
-  const simulateElevenLabsResponse = async (userInput: string): Promise<string> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // Simple response logic - in real implementation, this would call ElevenLabs API
+  const callElevenLabsAPI = async (text: string): Promise<string> => {
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY
+      const voiceId = process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_ID || '21m00Tcm4TlvDq8ikWAM' // Default voice
+      
+      if (!apiKey) {
+        console.warn('ElevenLabs API key not found, using fallback response')
+        return getFallbackResponse(text)
+      }
+
+      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'audio/mpeg',
+          'Content-Type': 'application/json',
+          'xi-api-key': apiKey,
+        },
+        body: JSON.stringify({
+          text: text,
+          model_id: 'eleven_monolingual_v1',
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: 0.75
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`ElevenLabs API error: ${response.status}`)
+      }
+
+      // Convert audio to base64 for playback
+      const audioBlob = await response.blob()
+      const audioUrl = URL.createObjectURL(audioBlob)
+      
+      // Play the audio
+      const audio = new Audio(audioUrl)
+      audio.play()
+      
+      return text
+    } catch (error) {
+      console.error('ElevenLabs API error:', error)
+      return getFallbackResponse(text)
+    }
+  }
+
+  const getFallbackResponse = (userInput: string): string => {
     const responses = [
       "I understand you're asking about relationship insights. Let me help you discover synergies in your network.",
       "Based on your question, I can see several opportunities for deeper connections in your professional network.",
