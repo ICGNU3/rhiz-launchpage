@@ -559,7 +559,7 @@ export default function Home() {
           {/* Floating Status Panels - Mobile Responsive */}
           <div className={`absolute z-20 ${
             isMobile 
-              ? 'top-20 left-2 right-2' 
+              ? 'top-32 left-2 right-2' 
               : 'top-16 left-4 right-4'
           }`}>
             <div className={`${
@@ -569,8 +569,8 @@ export default function Home() {
             }`}>
               {/* System Status HUD - Mobile Optimized */}
               <motion.div 
-                className={`bg-os-darker/90 backdrop-blur-md border border-synergy-gold/50 rounded-lg shadow-2xl ${
-                  isMobile ? 'p-3' : 'p-4'
+                className={`backdrop-blur-md border border-synergy-gold/50 rounded-lg shadow-2xl ${
+                  isMobile ? 'p-2 text-xs bg-os-darker/70' : 'p-4 bg-os-darker/90'
                 }`}
                 initial={{ opacity: 0, x: isMobile ? 0 : -50, y: isMobile ? -20 : 0 }}
                 animate={{ opacity: 1, x: 0, y: 0 }}
@@ -589,8 +589,8 @@ export default function Home() {
               
               {/* Network Metrics - Mobile Optimized */}
               <motion.div 
-                className={`bg-os-darker/90 backdrop-blur-md border border-depth-cyan/50 rounded-lg shadow-2xl ${
-                  isMobile ? 'p-3' : 'p-4'
+                className={`backdrop-blur-md border border-depth-cyan/50 rounded-lg shadow-2xl ${
+                  isMobile ? 'p-2 text-xs bg-os-darker/70' : 'p-4 bg-os-darker/90'
                 }`}
                 initial={{ opacity: 0, x: isMobile ? 0 : 50, y: isMobile ? -20 : 0 }}
                 animate={{ opacity: 1, x: 0, y: 0 }}
@@ -608,7 +608,7 @@ export default function Home() {
           
           {/* Central Command Header - Mobile First */}
           <div className={`text-center flex-grow flex flex-col justify-center ${
-            isMobile ? 'mt-24 mb-6 px-2' : 'mt-32 mb-8'
+            isMobile ? 'mt-40 mb-6 px-2' : 'mt-32 mb-8'
           }`}>
             {/* Holographic Title Display - Responsive */}
             <motion.div 
