@@ -67,6 +67,9 @@ export const ConversationalAgent = () => {
   const initializeConversation = async () => {
     try {
       const apiKey = process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY
+      console.log('API Key available:', !!apiKey)
+      console.log('Voice ID:', process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_ID)
+      
       if (!apiKey) {
         console.warn('ElevenLabs API key not found')
         return
@@ -96,8 +99,13 @@ export const ConversationalAgent = () => {
 
       if (response.ok) {
         const data = await response.json()
+        console.log('Conversation created:', data)
         setConversationId(data.conversation_id)
         setIsConnected(true)
+      } else {
+        console.error('Failed to create conversation:', response.status, response.statusText)
+        const errorText = await response.text()
+        console.error('Error details:', errorText)
       }
     } catch (error) {
       console.error('Failed to initialize conversation:', error)
