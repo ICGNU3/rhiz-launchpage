@@ -723,7 +723,7 @@ export default function Home() {
               {/* STAR OF THE SHOW - ElevenLabs Widget */}
               <div className="relative bg-gradient-to-r from-os-dark via-os-darker to-os-dark rounded-lg p-6 border-2 border-synergy-gold/70 shadow-[0_0_20px_rgba(255,215,0,0.2)]">
                 <div className="absolute inset-0 bg-gradient-to-r from-synergy-gold/5 via-transparent to-depth-cyan/5 rounded-lg"></div>
-                <div className="relative">
+                <div className="relative flex flex-col items-center justify-center min-h-[200px]">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-3 h-3 bg-synergy-gold rounded-full animate-pulse"></div>
                     <span className="text-sm font-mono text-synergy-gold font-bold">VOICE_INTERFACE.active</span>
@@ -738,7 +738,9 @@ export default function Home() {
                       ))}
                     </div>
                   </div>
-                  <ElevenLabsWidget />
+                  <div className="flex-1 flex items-center justify-center w-full">
+                    <ElevenLabsWidget />
+                  </div>
                   <div className="mt-3 text-xs text-center text-interface-light">
                     <span className="text-synergy-gold">◆</span> Ask about relationship insights, synergy opportunities, or network optimization <span className="text-synergy-gold">◆</span>
                   </div>
