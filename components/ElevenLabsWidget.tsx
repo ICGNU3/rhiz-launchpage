@@ -2,11 +2,29 @@
 
 import { useEffect, useRef, useState } from 'react'
 
+// Mobile detection hook
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false)
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+  
+  return isMobile
+}
+
 export const ElevenLabsWidget = () => {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isLoaded, setIsLoaded] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [widgetId, setWidgetId] = useState<string | null>(null)
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     // Create a function to handle script loading
@@ -67,10 +85,10 @@ export const ElevenLabsWidget = () => {
   }, [widgetId])
 
   return (
-    <div className="min-h-[180px] w-full rounded-lg overflow-hidden bg-gradient-to-br from-os-darker to-os-dark border border-depth-cyan/20">
+    <div className="w-full h-full flex items-center justify-center">
       <div 
         ref={containerRef}
-        className="w-full h-full min-h-[180px]"
+        className="w-full h-full flex items-center justify-center"
       >
         {error ? (
           <div className="flex items-center justify-center h-full">
@@ -78,15 +96,21 @@ export const ElevenLabsWidget = () => {
           </div>
         ) : !isLoaded ? (
           <div className="flex items-center justify-center h-full">
-            <div className="text-xs text-depth-cyan animate-pulse flex items-center gap-2">
+            <div className={`text-depth-cyan animate-pulse flex items-center gap-2 ${
+              isMobile ? 'text-xs' : 'text-xs'
+            }`}>
               <div className="w-1 h-1 bg-depth-cyan rounded-full animate-ping"></div>
-              Initializing Voice Interface...
+              {isMobile ? 'Initializing...' : 'Initializing Voice Interface...'}
             </div>
           </div>
         ) : widgetId ? (
           <elevenlabs-convai 
             agent-id="agent_0701k34axbdhfcnbst4hd9fvv20r"
             id={widgetId}
+            style={isMobile ? {
+              fontSize: '14px',
+              height: '140px'
+            } : {}}
           />
         ) : null}
       </div>
