@@ -677,7 +677,7 @@ export default function Home() {
             {/* Mega CTA - Mobile Optimized */}
             <motion.div 
               className={`relative ${
-                isMobile ? 'mb-8' : 'mb-12'
+                isMobile ? 'mb-32' : 'mb-48'
               }`}
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -688,6 +688,7 @@ export default function Home() {
                 ref={installButtonRef}
                 type="button" 
                 data-action="install"
+                onClick={() => window.open('https://buy.stripe.com/bJebJ0dgNcroeswgBvasg00', '_blank')}
                 className={`relative button-glow bg-gradient-to-r from-synergy-gold to-synergy-light text-os-dark font-bold rounded-2xl hover:from-synergy-light hover:to-synergy-gold transition-all duration-300 transform hover:scale-105 focus:ring-4 focus:ring-synergy-light/50 focus:ring-offset-2 focus:ring-offset-os-dark shadow-2xl ${
                   isMobile 
                     ? 'px-8 py-6 text-xl w-full max-w-sm mx-auto block' 
@@ -738,7 +739,7 @@ export default function Home() {
           {/* Bottom Command Center - Mobile Responsive */}
           <div className={`absolute left-4 right-4 ${
             isMobile ? 'bottom-4' : 'bottom-8 left-8 right-8'
-          }`}>
+          }`} style={{ zIndex: 10 }}>
             <div className={`gap-4 ${
               isMobile 
                 ? 'grid grid-cols-1'
