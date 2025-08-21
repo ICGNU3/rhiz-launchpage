@@ -52,6 +52,9 @@ interface LanguageOption {
 }
 
 export const ConversationalAgent = () => {
+  // Mobile detection
+  const [isMobile, setIsMobile] = useState(false)
+  
   // Core States
   const [aiState, setAIState] = useState<AIState>('idle')
   const [messages, setMessages] = useState<Message[]>([])
@@ -273,6 +276,18 @@ export const ConversationalAgent = () => {
       }
     }
   }, [currentLanguage, updateAudioVisualization])
+
+  // Mobile detection
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Initialize conversation with ElevenLabs
   useEffect(() => {
@@ -700,12 +715,14 @@ export const ConversationalAgent = () => {
   }
 
   return (
-    <div className="w-full h-full flex flex-col relative overflow-hidden">
+    <div className={`w-full h-full flex flex-col relative ${isMobile ? 'overflow-y-auto' : 'overflow-hidden'}`}>
       {/* Hidden audio element for playback */}
       <audio ref={audioRef} className="hidden" />
       
       {/* Enhanced Status Bar with AI State */}
-      <div className="flex items-center justify-between mb-3 p-2 bg-os-darker/50 rounded border border-synergy-gold/20">
+      <div className={`flex items-center justify-between mb-3 p-2 bg-os-darker/50 rounded border border-synergy-gold/20 ${
+        isMobile ? 'p-3' : ''
+      }`}>
         <div className="flex items-center gap-2">
           <motion.div 
             className={`w-3 h-3 rounded-full ${
@@ -714,26 +731,30 @@ export const ConversationalAgent = () => {
             animate={isConnected ? { scale: [1, 1.2, 1] } : {}}
             transition={{ duration: 2, repeat: Infinity }}
           />
-          <span className="text-xs font-mono text-interface-light">
+          <span className={`font-mono text-interface-light ${
+            isMobile ? 'text-sm' : 'text-xs'
+          }`}>
             RHIZ_AI.{aiState.toUpperCase()}
           </span>
         </div>
         
-        {/* Language Selector */}
-        <div className="flex items-center gap-2">
-          <select 
-            value={currentLanguage} 
-            onChange={(e) => changeLanguage(e.target.value as LanguageCode)}
-            aria-label="Select language for voice recognition"
-            className="bg-os-dark border border-depth-cyan/30 rounded text-xs px-2 py-1 text-interface-light"
-          >
-            {languages.map(lang => (
-              <option key={lang.code} value={lang.code}>
-                {lang.flag} {lang.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Language Selector - Hidden on mobile for space */}
+        {!isMobile && (
+          <div className="flex items-center gap-2">
+            <select 
+              value={currentLanguage} 
+              onChange={(e) => changeLanguage(e.target.value as LanguageCode)}
+              aria-label="Select language for voice recognition"
+              className="bg-os-dark border border-depth-cyan/30 rounded text-xs px-2 py-1 text-interface-light"
+            >
+              {languages.map(lang => (
+                <option key={lang.code} value={lang.code}>
+                  {lang.flag} {lang.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
       
       {/* Real-time Intelligence Display */}
@@ -743,14 +764,18 @@ export const ConversationalAgent = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mb-3 p-3 bg-gradient-to-r from-synergy-gold/10 to-depth-cyan/10 rounded border border-synergy-gold/30"
+            className={`mb-3 p-3 bg-gradient-to-r from-synergy-gold/10 to-depth-cyan/10 rounded border border-synergy-gold/30 ${
+              isMobile ? 'p-2' : ''
+            }`}
           >
-            <div className="grid grid-cols-3 gap-2 text-xs">
+            <div className={`grid gap-2 text-xs ${
+              isMobile ? 'grid-cols-1' : 'grid-cols-3'
+            }`}>
               {detectedEntities.length > 0 && (
                 <div>
                   <div className="text-synergy-gold font-mono mb-1">ENTITIES</div>
                   <div className="text-interface-light">
-                    {detectedEntities.slice(0, 2).map(entity => (
+                    {detectedEntities.slice(0, isMobile ? 1 : 2).map(entity => (
                       <span key={entity} className="inline-block bg-synergy-gold/20 px-1 rounded mr-1 mb-1">
                         {entity}
                       </span>
@@ -763,7 +788,7 @@ export const ConversationalAgent = () => {
                 <div>
                   <div className="text-depth-cyan font-mono mb-1">TOPICS</div>
                   <div className="text-interface-light">
-                    {activeTopics.slice(0, 2).map(topic => (
+                    {activeTopics.slice(0, isMobile ? 1 : 2).map(topic => (
                       <span key={topic} className="inline-block bg-depth-cyan/20 px-1 rounded mr-1 mb-1">
                         {topic}
                       </span>
@@ -836,7 +861,7 @@ export const ConversationalAgent = () => {
             <div className="text-depth-cyan">Ask about synergies, network depth, or collaboration opportunities</div>
           </motion.div>
         ) : (
-          messages.slice(-3).map((message) => (
+          messages.slice(isMobile ? -2 : -3).map((message) => (
             <motion.div
               key={message.id}
               initial={{ opacity: 0, y: 10 }}
@@ -844,16 +869,16 @@ export const ConversationalAgent = () => {
               className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[85%] rounded-lg px-3 py-2 text-xs relative ${
+                className={`max-w-[85%] rounded-lg px-3 py-2 relative ${
                   message.isUser
                     ? 'bg-gradient-to-r from-synergy-gold to-synergy-light text-os-dark'
                     : 'bg-gradient-to-r from-os-dark to-os-darker text-interface-light border border-depth-cyan/30'
-                }`}
+                } ${isMobile ? 'text-sm' : 'text-xs'}`}
               >
                 {message.text}
                 
-                {/* Confidence and Metadata */}
-                {message.confidence && (
+                {/* Confidence and Metadata - Simplified on mobile */}
+                {message.confidence && !isMobile && (
                   <div className={`mt-2 flex items-center gap-2 text-xs ${
                     message.isUser ? 'text-os-dark/70' : 'text-interface-gray'
                   }`}>
@@ -870,7 +895,7 @@ export const ConversationalAgent = () => {
                   </div>
                 )}
                 
-                {message.audioUrl && (
+                {message.audioUrl && !isMobile && (
                   <div className="mt-1 flex items-center gap-1">
                     <div className="w-1 h-1 bg-connection-green rounded-full animate-pulse"></div>
                     <span className="text-xs text-connection-green">Neural audio generated</span>
@@ -999,9 +1024,13 @@ export const ConversationalAgent = () => {
             exit={{ opacity: 0, height: 0 }}
             className="mb-3"
           >
-            <div className="text-xs font-mono text-depth-cyan mb-2">SUGGESTED_QUERIES</div>
-            <div className="grid grid-cols-2 gap-2">
-              {suggestions.slice(0, 4).map((suggestion, index) => (
+            <div className={`font-mono text-depth-cyan mb-2 ${
+              isMobile ? 'text-sm' : 'text-xs'
+            }`}>SUGGESTED_QUERIES</div>
+            <div className={`grid gap-2 ${
+              isMobile ? 'grid-cols-1' : 'grid-cols-2'
+            }`}>
+              {suggestions.slice(0, isMobile ? 2 : 4).map((suggestion, index) => (
                 <motion.button
                   key={index}
                   onClick={() => handleSuggestionClick(suggestion)}
@@ -1018,8 +1047,8 @@ export const ConversationalAgent = () => {
         )}
       </AnimatePresence>
       
-      {/* Relationship Metrics */}
-      {(relationshipDepth > 0 || learningProgress > 0) && (
+      {/* Relationship Metrics - Hidden on mobile for space */}
+      {(relationshipDepth > 0 || learningProgress > 0) && !isMobile && (
         <div className="mb-3 p-2 bg-os-darker/30 rounded border border-interface-gray/20">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -1052,21 +1081,22 @@ export const ConversationalAgent = () => {
       )}
 
       {/* Enhanced Input Area */}
-      <div className="flex items-center gap-2">
-        {/* AI State Indicator */}
-        <motion.div 
-          className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
-            aiState === 'listening' ? 'border-connection-green bg-connection-green/20' :
-            aiState === 'processing' ? 'border-synergy-gold bg-synergy-gold/20' :
-            aiState === 'speaking' ? 'border-alert-magenta bg-alert-magenta/20' :
-            aiState === 'learning' ? 'border-depth-cyan bg-depth-cyan/20' :
-            'border-interface-gray bg-interface-gray/20'
-          }`}
-          animate={{
-            scale: aiState !== 'idle' ? [1, 1.1, 1] : 1
-          }}
-          transition={{ duration: 1, repeat: aiState !== 'idle' ? Infinity : 0 }}
-        >
+      <div className={`flex items-center gap-2 ${isMobile ? 'gap-3' : ''}`}>
+        {/* AI State Indicator - Hidden on mobile for space */}
+        {!isMobile && (
+          <motion.div 
+            className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
+              aiState === 'listening' ? 'border-connection-green bg-connection-green/20' :
+              aiState === 'processing' ? 'border-synergy-gold bg-synergy-gold/20' :
+              aiState === 'speaking' ? 'border-alert-magenta bg-alert-magenta/20' :
+              aiState === 'learning' ? 'border-depth-cyan bg-depth-cyan/20' :
+              'border-interface-gray bg-interface-gray/20'
+            }`}
+            animate={{
+              scale: aiState !== 'idle' ? [1, 1.1, 1] : 1
+            }}
+            transition={{ duration: 1, repeat: aiState !== 'idle' ? Infinity : 0 }}
+          >
           {aiState === 'idle' && (
             <motion.div 
               className="w-4 h-4 bg-interface-gray rounded-full"
@@ -1129,6 +1159,7 @@ export const ConversationalAgent = () => {
             />
           )}
         </motion.div>
+        )}
 
         {/* Voice Button */}
         <motion.button
@@ -1189,8 +1220,8 @@ export const ConversationalAgent = () => {
           />
         </form>
 
-        {/* Confidence Indicator */}
-        {confidence > 0 && (
+        {/* Confidence Indicator - Hidden on mobile for space */}
+        {confidence > 0 && !isMobile && (
           <motion.div 
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -1205,8 +1236,8 @@ export const ConversationalAgent = () => {
           </motion.div>
         )}
 
-        {/* Processing Neural Network Animation */}
-        {aiState === 'processing' && (
+        {/* Processing Neural Network Animation - Hidden on mobile for space */}
+        {aiState === 'processing' && !isMobile && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
