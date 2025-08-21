@@ -475,16 +475,21 @@ export default function Home() {
                 key={`particle-${i}`}
                 className="absolute w-1 h-1 bg-depth-cyan rounded-full"
                 initial={{ 
-                  x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1920), 
-                  y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1080),
+                  x: 0, 
+                  y: 0,
                   opacity: 0
                 }}
                 animate={{
-                  x: [Math.random() * 1920, Math.random() * 1920],
-                  y: [Math.random() * 1080, Math.random() * 1080],
+                  x: [0, 1920],
+                  y: [0, 1080],
                   opacity: [0, 1, 0]
                 }}
-                transition={{ duration: 8 + Math.random() * 4, repeat: Infinity, delay: i * 0.1 }}
+                transition={{ 
+                  duration: 8 + (i % 4), 
+                  repeat: Infinity, 
+                  delay: i * 0.1,
+                  ease: "linear"
+                }}
               />
             ))}
           </div>
