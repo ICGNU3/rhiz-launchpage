@@ -476,7 +476,7 @@ export default function Home() {
       </div>
 
       {/* Hero Section - Mobile-First Responsive Control Room */}
-      <section className="min-h-screen relative overflow-hidden bg-gradient-to-br from-os-dark via-os-darker to-os-dark">
+      <section className="min-h-screen relative overflow-hidden bg-gradient-to-br from-os-dark via-os-darker to-os-dark w-full">
         {/* Multi-Layer Animated Backgrounds - Optimized for Mobile */}
         <div className="absolute inset-0">
           {/* Primary Grid - Responsive Density */}
@@ -555,24 +555,15 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto relative z-10 min-h-screen flex flex-col px-4">
-          {/* Floating Status Panels - Mobile Responsive */}
-          <div className={`absolute z-20 ${
-            isMobile 
-              ? 'top-32 left-2 right-2' 
-              : 'top-16 left-4 right-4'
-          }`}>
-            <div className={`${
-              isMobile 
-                ? 'flex flex-col gap-3' 
-                : 'flex justify-between items-start'
-            }`}>
-              {/* System Status HUD - Mobile Optimized */}
+        <div className="max-w-7xl mx-auto relative z-10 min-h-screen flex flex-col px-4 overflow-x-hidden">
+          {/* Floating Status Panels - Hidden on Mobile */}
+          {!isMobile && (
+            <div className="absolute z-20 top-16 left-4 right-4">
+              <div className="flex justify-between items-start">
+              {/* System Status HUD */}
               <motion.div 
-                className={`backdrop-blur-md border border-synergy-gold/50 rounded-lg shadow-2xl ${
-                  isMobile ? 'p-2 text-xs bg-os-darker/70' : 'p-4 bg-os-darker/90'
-                }`}
-                initial={{ opacity: 0, x: isMobile ? 0 : -50, y: isMobile ? -20 : 0 }}
+                className="backdrop-blur-md border border-synergy-gold/50 rounded-lg shadow-2xl p-4 bg-os-darker/90"
+                initial={{ opacity: 0, x: -50, y: 0 }}
                 animate={{ opacity: 1, x: 0, y: 0 }}
                 transition={{ delay: 1 }}
               >
@@ -587,12 +578,10 @@ export default function Home() {
                 </div>
               </motion.div>
               
-              {/* Network Metrics - Mobile Optimized */}
+              {/* Network Metrics */}
               <motion.div 
-                className={`backdrop-blur-md border border-depth-cyan/50 rounded-lg shadow-2xl ${
-                  isMobile ? 'p-2 text-xs bg-os-darker/70' : 'p-4 bg-os-darker/90'
-                }`}
-                initial={{ opacity: 0, x: isMobile ? 0 : 50, y: isMobile ? -20 : 0 }}
+                className="backdrop-blur-md border border-depth-cyan/50 rounded-lg shadow-2xl p-4 bg-os-darker/90"
+                initial={{ opacity: 0, x: 50, y: 0 }}
                 animate={{ opacity: 1, x: 0, y: 0 }}
                 transition={{ delay: 1.2 }}
               >
@@ -605,10 +594,11 @@ export default function Home() {
               </motion.div>
             </div>
           </div>
+          )}
           
           {/* Central Command Header - Mobile First */}
           <div className={`text-center flex-grow flex flex-col justify-center ${
-            isMobile ? 'mt-40 mb-6 px-2' : 'mt-32 mb-8'
+            isMobile ? 'mt-20 mb-6 px-2' : 'mt-32 mb-8'
           }`}>
             {/* Holographic Title Display - Responsive */}
             <motion.div 
