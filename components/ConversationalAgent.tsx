@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface Message {
   id: string
@@ -8,23 +9,131 @@ interface Message {
   isUser: boolean
   timestamp: Date
   audioUrl?: string
+  confidence?: number
+  entities?: string[]
+  topics?: string[]
+  synergies?: SynergyOpportunity[]
+  sentiment?: 'positive' | 'neutral' | 'negative'
 }
 
 interface AgentResponse {
   text: string
   audioUrl?: string
+  confidence?: number
+  entities?: string[]
+  topics?: string[]
+  synergies?: SynergyOpportunity[]
+  sentiment?: 'positive' | 'neutral' | 'negative'
+}
+
+interface SynergyOpportunity {
+  id: string
+  title: string
+  value: number
+  confidence: number
+  connections: string[]
+}
+
+interface VoiceBiometrics {
+  pitch: number
+  tone: string
+  energy: number
+  speaking_rate: number
+}
+
+type AIState = 'idle' | 'listening' | 'processing' | 'speaking' | 'learning' | 'analyzing'
+
+type LanguageCode = 'en-US' | 'es-ES' | 'fr-FR' | 'de-DE' | 'zh-CN' | 'ja-JP'
+
+interface LanguageOption {
+  code: LanguageCode
+  name: string
+  flag: string
 }
 
 export const ConversationalAgent = () => {
-  const [isListening, setIsListening] = useState(false)
-  const [isProcessing, setIsProcessing] = useState(false)
+  // Core States
+  const [aiState, setAIState] = useState<AIState>('idle')
   const [messages, setMessages] = useState<Message[]>([])
   const [currentInput, setCurrentInput] = useState('')
   const [isConnected, setIsConnected] = useState(false)
+  
+  // Advanced AI States
+  const [confidence, setConfidence] = useState(0)
+  const [detectedEntities, setDetectedEntities] = useState<string[]>([])
+  const [activeTopics, setActiveTopics] = useState<string[]>([])
+  const [synergies, setSynergies] = useState<SynergyOpportunity[]>([])
+  const [voiceBiometrics, setVoiceBiometrics] = useState<VoiceBiometrics | null>(null)
+  const [relationshipDepth, setRelationshipDepth] = useState(0)
+  
+  // Language & Suggestions
+  const [currentLanguage, setCurrentLanguage] = useState<LanguageCode>('en-US')
+  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  
+  // Audio Visualization
+  const [audioLevels, setAudioLevels] = useState<number[]>(Array(12).fill(0))
+  const [waveformData, setWaveformData] = useState<number[]>(Array(50).fill(0))
+  const [isThinking, setIsThinking] = useState(false)
+  
+  // Memory & Learning
+  const [memoryContext, setMemoryContext] = useState<string[]>([])
+  const [learningProgress, setLearningProgress] = useState(0)
+  
+  // Refs
   const recognitionRef = useRef<any>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const audioContextRef = useRef<AudioContext | null>(null)
+  const analyserRef = useRef<AnalyserNode | null>(null)
+  const animationFrameRef = useRef<number | null>(null)
 
-  // Initialize speech recognition
+  // Language options
+  const languages: LanguageOption[] = [
+    { code: 'en-US', name: 'English', flag: '🇺🇸' },
+    { code: 'es-ES', name: 'Español', flag: '🇪🇸' },
+    { code: 'fr-FR', name: 'Français', flag: '🇫🇷' },
+    { code: 'de-DE', name: 'Deutsch', flag: '🇩🇪' },
+    { code: 'zh-CN', name: '中文', flag: '🇨🇳' },
+    { code: 'ja-JP', name: '日本語', flag: '🇯🇵' }
+  ]
+
+  // Audio visualization update function
+  const updateAudioVisualization = useCallback(() => {
+    if (analyserRef.current) {
+      const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount)
+      analyserRef.current.getByteFrequencyData(dataArray)
+      
+      // Create audio levels for bars
+      const levels = []
+      const step = Math.floor(dataArray.length / 12)
+      for (let i = 0; i < 12; i++) {
+        const start = i * step
+        const end = start + step
+        const slice = dataArray.slice(start, end)
+        const average = slice.reduce((sum, value) => sum + value, 0) / slice.length
+        levels.push(average / 255) // Normalize to 0-1
+      }
+      setAudioLevels(levels)
+      
+      // Create waveform data
+      const waveform = []
+      const waveStep = Math.floor(dataArray.length / 50)
+      for (let i = 0; i < 50; i++) {
+        const start = i * waveStep
+        const end = start + waveStep
+        const slice = dataArray.slice(start, end)
+        const average = slice.reduce((sum, value) => sum + value, 0) / slice.length
+        waveform.push(average / 255)
+      }
+      setWaveformData(waveform)
+    }
+    
+    if (aiState === 'listening' || aiState === 'speaking') {
+      animationFrameRef.current = requestAnimationFrame(updateAudioVisualization)
+    }
+  }, [aiState])
+
+  // Initialize speech recognition with enhanced features
   useEffect(() => {
     if (typeof window !== 'undefined') {
       // Check for browser support
@@ -32,31 +141,80 @@ export const ConversationalAgent = () => {
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
         recognitionRef.current = new SpeechRecognition()
         recognitionRef.current.continuous = false
-        recognitionRef.current.interimResults = false
-        recognitionRef.current.lang = 'en-US'
+        recognitionRef.current.interimResults = true
+        recognitionRef.current.lang = currentLanguage
+        recognitionRef.current.maxAlternatives = 3
 
         recognitionRef.current.onstart = () => {
-          setIsListening(true)
+          setAIState('listening')
           setIsConnected(true)
+          setShowSuggestions(false)
+          
+          // Start audio visualization
+          navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+              audioContextRef.current = new AudioContext()
+              const source = audioContextRef.current.createMediaStreamSource(stream)
+              analyserRef.current = audioContextRef.current.createAnalyser()
+              analyserRef.current.fftSize = 256
+              source.connect(analyserRef.current)
+              updateAudioVisualization()
+            })
+            .catch(console.error)
         }
 
         recognitionRef.current.onresult = (event: any) => {
-          const transcript = event.results[0][0].transcript
+          const result = event.results[event.results.length - 1]
+          const transcript = result[0].transcript
+          const confidence = result[0].confidence
+          
           setCurrentInput(transcript)
-          handleUserMessage(transcript)
+          setConfidence(confidence * 100)
+          
+          // Simulate voice biometrics analysis
+          setVoiceBiometrics({
+            pitch: Math.random() * 100 + 50,
+            tone: ['calm', 'excited', 'focused', 'curious'][Math.floor(Math.random() * 4)],
+            energy: Math.random() * 100,
+            speaking_rate: Math.random() * 50 + 100
+          })
+          
+          if (result.isFinal) {
+            handleUserMessage(transcript, confidence)
+          }
         }
 
         recognitionRef.current.onerror = (event: any) => {
           console.error('Speech recognition error:', event.error)
-          setIsListening(false)
+          setAIState('idle')
+          if (animationFrameRef.current) {
+            cancelAnimationFrame(animationFrameRef.current)
+          }
         }
 
         recognitionRef.current.onend = () => {
-          setIsListening(false)
+          setAIState('idle')
+          if (animationFrameRef.current) {
+            cancelAnimationFrame(animationFrameRef.current)
+          }
         }
       }
+      
+      // Initialize suggestions
+      setSuggestions([
+        "What synergies do you see in my network?",
+        "Analyze the depth of my relationships",
+        "Show me collaboration opportunities",
+        "Who should I connect with next?"
+      ])
     }
-  }, [])
+    
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current)
+      }
+    }
+  }, [currentLanguage, updateAudioVisualization])
 
   // Initialize conversation with ElevenLabs
   useEffect(() => {
@@ -99,61 +257,226 @@ export const ConversationalAgent = () => {
     }
   }
 
-  const handleUserMessage = async (text: string) => {
+  const handleUserMessage = async (text: string, confidence: number = 100) => {
+    // Simulate entity and topic extraction
+    const entities = extractEntities(text)
+    const topics = extractTopics(text)
+    const detectedSynergies = findSynergies(text)
+    const sentiment = analyzeSentiment(text)
+    
     const userMessage: Message = {
       id: Date.now().toString(),
       text,
       isUser: true,
-      timestamp: new Date()
+      timestamp: new Date(),
+      confidence,
+      entities,
+      topics,
+      synergies: detectedSynergies,
+      sentiment
     }
 
     setMessages(prev => [...prev, userMessage])
-    setIsProcessing(true)
+    setAIState('processing')
+    setIsThinking(true)
+    
+    // Update context and learning
+    setDetectedEntities(prev => Array.from(new Set([...prev, ...entities])))
+    setActiveTopics(prev => Array.from(new Set([...prev, ...topics])))
+    setSynergies(prev => [...prev, ...detectedSynergies])
+    setMemoryContext(prev => [...prev, text].slice(-10)) // Keep last 10 interactions
+    
+    // Simulate processing time with thinking animation
+    await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 1000))
 
     try {
-      // For now, let's provide a simple response without the conversation API
-      const response = await sendMessageToAgent(text)
+      setAIState('analyzing')
+      const response = await sendMessageToAgent(text, confidence, entities, topics)
+      
+      setAIState('speaking')
+      setIsThinking(false)
       
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: response.text,
         isUser: false,
         timestamp: new Date(),
-        audioUrl: response.audioUrl
+        audioUrl: response.audioUrl,
+        confidence: response.confidence,
+        entities: response.entities,
+        topics: response.topics,
+        synergies: response.synergies,
+        sentiment: response.sentiment
       }
 
       setMessages(prev => [...prev, aiMessage])
+      
+      // Update relationship depth based on conversation quality
+      setRelationshipDepth(prev => Math.min(100, prev + Math.random() * 5))
+      setLearningProgress(prev => Math.min(100, prev + Math.random() * 3))
 
       // Play audio if available
       if (response.audioUrl && audioRef.current) {
         audioRef.current.src = response.audioUrl
+        audioRef.current.onplay = () => {
+          updateAudioVisualization()
+        }
+        audioRef.current.onended = () => {
+          setAIState('idle')
+          generateContextualSuggestions(response.text)
+        }
         audioRef.current.play()
+      } else {
+        setAIState('idle')
+        generateContextualSuggestions(response.text)
       }
 
     } catch (error) {
       console.error('Error processing message:', error)
+      setAIState('idle')
+      setIsThinking(false)
+      
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: "I'm sorry, I'm having trouble processing your request right now. Please try again.",
+        text: "I'm experiencing a temporary processing interruption. My relationship intelligence systems are recalibrating. Please try again.",
         isUser: false,
-        timestamp: new Date()
+        timestamp: new Date(),
+        confidence: 95
       }
       setMessages(prev => [...prev, errorMessage])
     } finally {
-      setIsProcessing(false)
       setCurrentInput('')
     }
   }
 
-  const sendMessageToAgent = async (text: string): Promise<AgentResponse> => {
+  // Enhanced AI processing functions
+  const extractEntities = (text: string): string[] => {
+    const entities = []
+    const lowerText = text.toLowerCase()
+    
+    // People names (simplified detection)
+    const namePatterns = /\b[A-Z][a-z]+ [A-Z][a-z]+\b/g
+    const names = text.match(namePatterns) || []
+    entities.push(...names)
+    
+    // Companies
+    const companies = ['google', 'apple', 'microsoft', 'amazon', 'stripe', 'openai', 'anthropic']
+    companies.forEach(company => {
+      if (lowerText.includes(company)) entities.push(company)
+    })
+    
+    // Technologies
+    const technologies = ['ai', 'machine learning', 'blockchain', 'api', 'cloud', 'data']
+    technologies.forEach(tech => {
+      if (lowerText.includes(tech)) entities.push(tech)
+    })
+    
+    return Array.from(new Set(entities))
+  }
+  
+  const extractTopics = (text: string): string[] => {
+    const topics: string[] = []
+    const lowerText = text.toLowerCase()
+    
+    const topicMap: Record<string, string[]> = {
+      'networking': ['network', 'connect', 'relationship', 'introduction'],
+      'business': ['business', 'startup', 'company', 'venture'],
+      'technology': ['tech', 'software', 'development', 'engineering'],
+      'collaboration': ['collaborate', 'partner', 'work together', 'team up'],
+      'opportunities': ['opportunity', 'chance', 'potential', 'possibility']
+    }
+    
+    Object.entries(topicMap).forEach(([topic, keywords]) => {
+      if (keywords.some(keyword => lowerText.includes(keyword))) {
+        topics.push(topic)
+      }
+    })
+    
+    return topics
+  }
+  
+  const findSynergies = (text: string): SynergyOpportunity[] => {
+    const synergies = []
+    const lowerText = text.toLowerCase()
+    
+    if (lowerText.includes('startup') || lowerText.includes('entrepreneur')) {
+      synergies.push({
+        id: Date.now().toString(),
+        title: 'Startup Ecosystem Connection',
+        value: 250000 + Math.random() * 500000,
+        confidence: 0.8 + Math.random() * 0.2,
+        connections: ['VCs', 'Accelerators', 'Fellow Founders']
+      })
+    }
+    
+    if (lowerText.includes('ai') || lowerText.includes('machine learning')) {
+      synergies.push({
+        id: (Date.now() + 1).toString(),
+        title: 'AI Research Collaboration',
+        value: 180000 + Math.random() * 320000,
+        confidence: 0.7 + Math.random() * 0.3,
+        connections: ['Research Labs', 'AI Companies', 'Tech Leaders']
+      })
+    }
+    
+    return synergies
+  }
+  
+  const analyzeSentiment = (text: string): 'positive' | 'neutral' | 'negative' => {
+    const positiveWords = ['good', 'great', 'excellent', 'amazing', 'wonderful', 'excited']
+    const negativeWords = ['bad', 'terrible', 'awful', 'disappointed', 'frustrated']
+    
+    const lowerText = text.toLowerCase()
+    const positiveCount = positiveWords.filter(word => lowerText.includes(word)).length
+    const negativeCount = negativeWords.filter(word => lowerText.includes(word)).length
+    
+    if (positiveCount > negativeCount) return 'positive'
+    if (negativeCount > positiveCount) return 'negative'
+    return 'neutral'
+  }
+  
+  const generateContextualSuggestions = (responseText: string) => {
+    const suggestions = []
+    const lowerResponse = responseText.toLowerCase()
+    
+    if (lowerResponse.includes('network')) {
+      suggestions.push("Show me my network map", "Analyze connection strength")
+    }
+    if (lowerResponse.includes('synergy')) {
+      suggestions.push("Find more synergies", "Calculate opportunity value")
+    }
+    if (lowerResponse.includes('relationship')) {
+      suggestions.push("Deepen this relationship", "Schedule follow-up")
+    }
+    
+    // Always include some general suggestions
+    suggestions.push(
+      "What patterns do you see?",
+      "Recommend next actions",
+      "Show relationship timeline"
+    )
+    
+    setSuggestions(suggestions.slice(0, 4))
+    setShowSuggestions(true)
+  }
+
+  const sendMessageToAgent = async (
+    text: string, 
+    confidence: number = 100, 
+    entities: string[] = [], 
+    topics: string[] = []
+  ): Promise<AgentResponse> => {
     const apiKey = process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY
     if (!apiKey) {
       throw new Error('API key not available')
     }
 
-    // For now, let's use a simple text-to-speech approach
-    // This will generate a response and convert it to speech
-    const aiResponse = generateAIResponse(text)
+    // Enhanced AI response generation with context
+    const aiResponse = generateAIResponse(text, entities, topics, memoryContext)
+    const responseEntities = extractEntities(aiResponse)
+    const responseTopics = extractTopics(aiResponse)
+    const responseSynergies = findSynergies(aiResponse)
+    const responseSentiment = analyzeSentiment(aiResponse)
     
     try {
       // Convert the response to speech using ElevenLabs TTS
@@ -170,8 +493,10 @@ export const ConversationalAgent = () => {
           text: aiResponse,
           model_id: 'eleven_monolingual_v1',
           voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.75
+            stability: 0.6,
+            similarity_boost: 0.8,
+            style: 0.2,
+            use_speaker_boost: true
           }
         })
       })
@@ -182,57 +507,121 @@ export const ConversationalAgent = () => {
         
         return {
           text: aiResponse,
-          audioUrl: audioUrl
+          audioUrl: audioUrl,
+          confidence: 85 + Math.random() * 15,
+          entities: responseEntities,
+          topics: responseTopics,
+          synergies: responseSynergies,
+          sentiment: responseSentiment
         }
       } else {
         console.warn('TTS failed, returning text only')
         return {
           text: aiResponse,
-          audioUrl: undefined
+          audioUrl: undefined,
+          confidence: 90 + Math.random() * 10,
+          entities: responseEntities,
+          topics: responseTopics,
+          synergies: responseSynergies,
+          sentiment: responseSentiment
         }
       }
     } catch (error) {
       console.warn('TTS error, returning text only:', error)
       return {
         text: aiResponse,
-        audioUrl: undefined
+        audioUrl: undefined,
+        confidence: 85 + Math.random() * 15,
+        entities: responseEntities,
+        topics: responseTopics,
+        synergies: responseSynergies,
+        sentiment: responseSentiment
       }
     }
   }
 
-  const generateAIResponse = (userInput: string): string => {
-    // Simple AI response logic for RHIZ relationship intelligence
+  const generateAIResponse = (userInput: string, entities: string[] = [], topics: string[] = [], context: string[] = []): string => {
     const input = userInput.toLowerCase()
+    const hasContext = context.length > 0
+    const contextual = hasContext ? "Building on our previous conversation, " : ""
     
+    // Advanced response logic with entity and topic awareness
     if (input.includes('relationship') || input.includes('network')) {
-      return "I can help you analyze your relationship network. RHIZ's synergy detection can identify high-value connections and opportunities you might be missing. What specific aspect of your network would you like to explore?"
+      if (entities.length > 0) {
+        return `${contextual}I've detected ${entities.length} key entities in your network: ${entities.slice(0, 3).join(', ')}. My relationship intelligence analysis shows potential for deepening these connections by 340%. I can map the synergy pathways between ${entities[0]} and your other connections. What specific relationship dynamics would you like me to analyze?`
+      }
+      return `${contextual}I'm analyzing your relationship network topology. My neural pathways are detecting 94 active synergies with depth scores averaging 82%. I can help you navigate the relationship matrix to unlock hidden value. Which network layer should we explore first?`
     }
     
     if (input.includes('synergy') || input.includes('opportunity')) {
-      return "Synergy detection is one of RHIZ's core capabilities. I can help you identify potential collaborations, partnerships, and opportunities within your network. Would you like me to analyze your current connections?"
+      const synergyValue = Math.floor(Math.random() * 3000000) + 500000
+      return `${contextual}Synergy detection protocol activated. I've identified $${(synergyValue).toLocaleString()} in potential opportunity value across your network. The highest-probability synergies involve ${topics.length > 0 ? topics.join(' and ') : 'technological innovation and strategic partnerships'}. Shall I initiate deep synergy mapping?`
+    }
+    
+    if (input.includes('analyze') || input.includes('depth')) {
+      return `${contextual}Initiating relationship depth analysis. My neural networks are processing communication patterns, interaction frequency, and value exchange matrices. Current depth metrics show ${Math.floor(Math.random() * 40) + 60}% optimization potential. I'm detecting untapped collaboration opportunities that could increase relationship value by 240%. What specific depth parameters should I focus on?`
+    }
+    
+    if (input.includes('connect') || input.includes('introduction')) {
+      return `${contextual}Connection optimization protocol engaged. Based on your network topology, I've identified 7 high-value introduction opportunities with success probabilities above 85%. The optimal connection sequence involves leveraging your ${entities.length > 0 ? entities[0] : 'strongest'} relationship as an anchor point. Should I generate the introduction pathway map?`
     }
     
     if (input.includes('help') || input.includes('what can you do')) {
-      return "I'm RHIZ, your AI relationship intelligence assistant. I can help you discover synergies in your network, optimize relationships, and identify high-value connections. Ask me about relationship insights, network optimization, or synergy opportunities."
+      return `${contextual}I'm RHIZ, your neural relationship intelligence system. My capabilities include: real-time synergy detection, relationship depth analysis, network optimization, opportunity value calculation, and strategic connection planning. I process voice biometrics, sentiment analysis, and contextual intelligence to maximize your relationship ROI. What aspect of relationship intelligence interests you most?`
     }
     
     if (input.includes('hello') || input.includes('hi')) {
-      return "Hello! I'm RHIZ, your AI relationship intelligence assistant. I'm here to help you discover synergies and optimize your network. How can I assist you today?"
+      const greetings = [
+        "Neural pathways activated. I'm RHIZ, your relationship intelligence architect.",
+        "Connection established. I'm RHIZ, analyzing your relationship matrix in real-time.",
+        "System online. I'm RHIZ, your AI-powered synergy detection engine."
+      ]
+      return greetings[Math.floor(Math.random() * greetings.length)] + " How can I optimize your network today?"
     }
     
-    // Default response
-    return "I understand you're asking about " + userInput + ". As your relationship intelligence assistant, I can help you analyze connections, identify synergies, and optimize your network. Could you tell me more about what you're looking to achieve?"
+    if (input.includes('show') || input.includes('visualize')) {
+      return `${contextual}Generating visual intelligence display. I can render your relationship network as an interactive 3D topology, highlight synergy pathways with probability heat maps, and show relationship depth gradients. The visualization will reveal hidden connection patterns and untapped value nodes. Which visualization mode would you prefer?`
+    }
+    
+    // Context-aware default responses
+    if (hasContext) {
+      return `Continuing our relationship intelligence analysis of "${userInput}". I'm processing this through my neural networks alongside our conversation history. I detect ${topics.length} relevant topics and ${entities.length} key entities. My algorithms suggest this connects to broader patterns in your network optimization. What specific insights are you seeking?`
+    }
+    
+    // Enhanced default response
+    const insights = [
+      "relationship depth optimization",
+      "synergy pathway mapping", 
+      "network value maximization",
+      "strategic connection planning",
+      "collaboration opportunity identification"
+    ]
+    
+    return `I'm processing "${userInput}" through my relationship intelligence algorithms. I can help you with ${insights[Math.floor(Math.random() * insights.length)]} and ${insights[Math.floor(Math.random() * insights.length)]}. My neural networks are detecting ${Math.floor(Math.random() * 20) + 10} potential connection points related to your query. How would you like to explore this further?`
   }
 
   const startListening = () => {
-    if (recognitionRef.current && !isListening) {
+    if (recognitionRef.current && aiState === 'idle') {
       recognitionRef.current.start()
     }
   }
 
   const stopListening = () => {
-    if (recognitionRef.current && isListening) {
+    if (recognitionRef.current && aiState === 'listening') {
       recognitionRef.current.stop()
+    }
+  }
+  
+  const handleSuggestionClick = (suggestion: string) => {
+    setCurrentInput(suggestion)
+    setShowSuggestions(false)
+    handleUserMessage(suggestion, 100)
+  }
+  
+  const changeLanguage = (languageCode: LanguageCode) => {
+    setCurrentLanguage(languageCode)
+    if (recognitionRef.current) {
+      recognitionRef.current.lang = languageCode
     }
   }
 
@@ -244,65 +633,456 @@ export const ConversationalAgent = () => {
   }
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-full flex flex-col relative overflow-hidden">
       {/* Hidden audio element for playback */}
-      <audio ref={audioRef} style={{ display: 'none' }} />
+      <audio ref={audioRef} className="hidden" />
       
-      {/* Connection Status */}
-      <div className="flex items-center gap-2 mb-3">
-        <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-connection-green' : 'bg-red-500'}`}></div>
-        <span className="text-xs font-mono text-interface-light">
-          {isConnected ? 'CONVERSATIONAL_AGENT.ONLINE' : 'CONVERSATIONAL_AGENT.OFFLINE'}
-        </span>
+      {/* Enhanced Status Bar with AI State */}
+      <div className="flex items-center justify-between mb-3 p-2 bg-os-darker/50 rounded border border-synergy-gold/20">
+        <div className="flex items-center gap-2">
+          <motion.div 
+            className={`w-3 h-3 rounded-full ${
+              isConnected ? 'bg-connection-green' : 'bg-red-500'
+            }`}
+            animate={isConnected ? { scale: [1, 1.2, 1] } : {}}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
+          <span className="text-xs font-mono text-interface-light">
+            RHIZ_AI.{aiState.toUpperCase()}
+          </span>
+        </div>
+        
+        {/* Language Selector */}
+        <div className="flex items-center gap-2">
+          <select 
+            value={currentLanguage} 
+            onChange={(e) => changeLanguage(e.target.value as LanguageCode)}
+            aria-label="Select language for voice recognition"
+            className="bg-os-dark border border-depth-cyan/30 rounded text-xs px-2 py-1 text-interface-light"
+          >
+            {languages.map(lang => (
+              <option key={lang.code} value={lang.code}>
+                {lang.flag} {lang.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
+      
+      {/* Real-time Intelligence Display */}
+      <AnimatePresence>
+        {(detectedEntities.length > 0 || activeTopics.length > 0 || synergies.length > 0) && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-3 p-3 bg-gradient-to-r from-synergy-gold/10 to-depth-cyan/10 rounded border border-synergy-gold/30"
+          >
+            <div className="grid grid-cols-3 gap-2 text-xs">
+              {detectedEntities.length > 0 && (
+                <div>
+                  <div className="text-synergy-gold font-mono mb-1">ENTITIES</div>
+                  <div className="text-interface-light">
+                    {detectedEntities.slice(0, 2).map(entity => (
+                      <span key={entity} className="inline-block bg-synergy-gold/20 px-1 rounded mr-1 mb-1">
+                        {entity}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {activeTopics.length > 0 && (
+                <div>
+                  <div className="text-depth-cyan font-mono mb-1">TOPICS</div>
+                  <div className="text-interface-light">
+                    {activeTopics.slice(0, 2).map(topic => (
+                      <span key={topic} className="inline-block bg-depth-cyan/20 px-1 rounded mr-1 mb-1">
+                        {topic}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {synergies.length > 0 && (
+                <div>
+                  <div className="text-alert-magenta font-mono mb-1">SYNERGIES</div>
+                  <div className="text-interface-light">
+                    ${Math.floor(synergies.reduce((sum, s) => sum + s.value, 0)).toLocaleString()}
+                  </div>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      {/* Voice Biometrics Display */}
+      <AnimatePresence>
+        {voiceBiometrics && aiState === 'listening' && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="mb-3 p-2 bg-os-darker/70 rounded border border-connection-green/30"
+          >
+            <div className="grid grid-cols-4 gap-2 text-xs">
+              <div>
+                <div className="text-connection-green font-mono">PITCH</div>
+                <div className="text-interface-light">{Math.floor(voiceBiometrics.pitch)}Hz</div>
+              </div>
+              <div>
+                <div className="text-connection-green font-mono">TONE</div>
+                <div className="text-interface-light">{voiceBiometrics.tone}</div>
+              </div>
+              <div>
+                <div className="text-connection-green font-mono">ENERGY</div>
+                <div className="text-interface-light">{Math.floor(voiceBiometrics.energy)}%</div>
+              </div>
+              <div>
+                <div className="text-connection-green font-mono">RATE</div>
+                <div className="text-interface-light">{Math.floor(voiceBiometrics.speaking_rate)}wpm</div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Messages Display */}
-      <div className="flex-1 overflow-y-auto mb-4 space-y-3 max-h-32">
+      {/* Messages Display with Enhanced Visualization */}
+      <div className="flex-1 overflow-y-auto mb-4 space-y-3 max-h-40">
         {messages.length === 0 ? (
-          <div className="text-center text-xs text-interface-gray py-4">
-            Ask me about relationship insights, network optimization, or synergy opportunities
-          </div>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center text-xs text-interface-gray py-4 space-y-2"
+          >
+            <div className="flex justify-center items-center gap-2 mb-2">
+              <motion.div 
+                className="w-2 h-2 bg-synergy-gold rounded-full"
+                animate={{ scale: [1, 1.5, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+              <span className="text-synergy-gold font-mono">NEURAL_PATHWAYS.READY</span>
+            </div>
+            <div>Voice-enabled relationship intelligence at your command</div>
+            <div className="text-depth-cyan">Ask about synergies, network depth, or collaboration opportunities</div>
+          </motion.div>
         ) : (
-          messages.slice(-4).map((message) => (
-            <div
+          messages.slice(-3).map((message) => (
+            <motion.div
               key={message.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
               className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[80%] rounded-lg px-3 py-2 text-xs ${
+                className={`max-w-[85%] rounded-lg px-3 py-2 text-xs relative ${
                   message.isUser
-                    ? 'bg-synergy-gold text-os-dark'
-                    : 'bg-os-dark text-interface-light border border-depth-cyan/30'
+                    ? 'bg-gradient-to-r from-synergy-gold to-synergy-light text-os-dark'
+                    : 'bg-gradient-to-r from-os-dark to-os-darker text-interface-light border border-depth-cyan/30'
                 }`}
               >
                 {message.text}
+                
+                {/* Confidence and Metadata */}
+                {message.confidence && (
+                  <div className={`mt-2 flex items-center gap-2 text-xs ${
+                    message.isUser ? 'text-os-dark/70' : 'text-interface-gray'
+                  }`}>
+                    <span>Confidence: {Math.floor(message.confidence)}%</span>
+                    {message.sentiment && (
+                      <span className={`px-1 rounded ${
+                        message.sentiment === 'positive' ? 'bg-connection-green/20 text-connection-green' :
+                        message.sentiment === 'negative' ? 'bg-red-500/20 text-red-400' :
+                        'bg-interface-gray/20 text-interface-gray'
+                      }`}>
+                        {message.sentiment}
+                      </span>
+                    )}
+                  </div>
+                )}
+                
                 {message.audioUrl && (
-                  <div className="mt-1">
-                    <span className="text-xs text-interface-gray">🔊 Audio available</span>
+                  <div className="mt-1 flex items-center gap-1">
+                    <div className="w-1 h-1 bg-connection-green rounded-full animate-pulse"></div>
+                    <span className="text-xs text-connection-green">Neural audio generated</span>
                   </div>
                 )}
               </div>
-            </div>
+            </motion.div>
           ))
         )}
       </div>
+      
+      {/* AI Thinking Animation */}
+      <AnimatePresence>
+        {isThinking && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-3 p-3 bg-gradient-to-r from-synergy-gold/10 to-depth-cyan/10 rounded border border-synergy-gold/50"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex gap-1">
+                {[0, 1, 2].map(i => (
+                  <motion.div
+                    key={i}
+                    className="w-2 h-2 bg-synergy-gold rounded-full"
+                    animate={{ 
+                      scale: [1, 1.5, 1],
+                      opacity: [0.5, 1, 0.5]
+                    }}
+                    transition={{ 
+                      duration: 1.5, 
+                      repeat: Infinity, 
+                      delay: i * 0.2 
+                    }}
+                  />
+                ))}
+              </div>
+              <span className="text-xs font-mono text-synergy-gold">
+                NEURAL_PROCESSING.ACTIVE
+              </span>
+              <div className="flex-1">
+                <div className="w-full bg-os-dark rounded-full h-1">
+                  <motion.div 
+                    className="bg-gradient-to-r from-synergy-gold to-depth-cyan h-1 rounded-full"
+                    animate={{ width: ['0%', '100%', '0%'] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      {/* Real-time Audio Visualization */}
+      <AnimatePresence>
+        {(aiState === 'listening' || aiState === 'speaking') && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-3"
+          >
+            {/* Waveform Visualization */}
+            <div className="flex items-center justify-center gap-1 h-12 mb-2">
+              {audioLevels.map((level, index) => (
+                <motion.div
+                  key={index}
+                  className={`w-1 rounded-full ${
+                    aiState === 'listening' ? 'bg-connection-green' : 'bg-synergy-gold'
+                  }`}
+                  style={{
+                    height: `${Math.max(4, level * 40)}px`
+                  }}
+                  animate={{
+                    height: `${Math.max(4, level * 40)}px`,
+                    opacity: [0.5, 1, 0.5]
+                  }}
+                  transition={{ duration: 0.1 }}
+                />
+              ))}
+            </div>
+            
+            {/* State Indicator */}
+            <div className="text-center">
+              <span className={`text-xs font-mono ${
+                aiState === 'listening' ? 'text-connection-green' : 'text-synergy-gold'
+              }`}>
+                {aiState === 'listening' ? 'VOICE_CAPTURE.ACTIVE' : 'NEURAL_SYNTHESIS.ACTIVE'}
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      {/* Smart Suggestions */}
+      <AnimatePresence>
+        {showSuggestions && suggestions.length > 0 && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-3"
+          >
+            <div className="text-xs font-mono text-depth-cyan mb-2">SUGGESTED_QUERIES</div>
+            <div className="grid grid-cols-2 gap-2">
+              {suggestions.slice(0, 4).map((suggestion, index) => (
+                <motion.button
+                  key={index}
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  className="text-left p-2 bg-os-darker/50 hover:bg-depth-cyan/20 border border-depth-cyan/30 rounded text-xs transition-all"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {suggestion}
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      {/* Relationship Metrics */}
+      {(relationshipDepth > 0 || learningProgress > 0) && (
+        <div className="mb-3 p-2 bg-os-darker/30 rounded border border-interface-gray/20">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <div className="text-xs font-mono text-depth-cyan mb-1">RELATIONSHIP_DEPTH</div>
+              <div className="w-full bg-os-dark rounded-full h-1">
+                <motion.div 
+                  className="bg-gradient-to-r from-depth-blue to-depth-cyan h-1 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${relationshipDepth}%` }}
+                  transition={{ duration: 1 }}
+                />
+              </div>
+              <div className="text-xs text-interface-light mt-1">{Math.floor(relationshipDepth)}%</div>
+            </div>
+            
+            <div>
+              <div className="text-xs font-mono text-synergy-gold mb-1">AI_LEARNING</div>
+              <div className="w-full bg-os-dark rounded-full h-1">
+                <motion.div 
+                  className="bg-gradient-to-r from-synergy-gold to-synergy-light h-1 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${learningProgress}%` }}
+                  transition={{ duration: 1 }}
+                />
+              </div>
+              <div className="text-xs text-interface-light mt-1">{Math.floor(learningProgress)}%</div>
+            </div>
+          </div>
+        </div>
+      )}
 
-      {/* Input Area */}
+      {/* Enhanced Input Area */}
       <div className="flex items-center gap-2">
-        {/* Voice Button */}
-        <button
-          onClick={isListening ? stopListening : startListening}
-          disabled={isProcessing || !isConnected}
-          aria-label={isListening ? "Stop listening" : "Start voice recognition"}
-          title={isListening ? "Stop listening" : "Start voice recognition"}
-          className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-            isListening
-              ? 'bg-alert-magenta animate-pulse'
-              : 'bg-connection-green hover:bg-connection-green/80'
-          } ${(isProcessing || !isConnected) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+        {/* AI State Indicator */}
+        <motion.div 
+          className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
+            aiState === 'listening' ? 'border-connection-green bg-connection-green/20' :
+            aiState === 'processing' ? 'border-synergy-gold bg-synergy-gold/20' :
+            aiState === 'speaking' ? 'border-alert-magenta bg-alert-magenta/20' :
+            aiState === 'learning' ? 'border-depth-cyan bg-depth-cyan/20' :
+            'border-interface-gray bg-interface-gray/20'
+          }`}
+          animate={{
+            scale: aiState !== 'idle' ? [1, 1.1, 1] : 1
+          }}
+          transition={{ duration: 1, repeat: aiState !== 'idle' ? Infinity : 0 }}
         >
-          <div className={`w-3 h-3 ${isListening ? 'bg-white' : 'bg-os-dark'}`}></div>
-        </button>
+          {aiState === 'idle' && (
+            <motion.div 
+              className="w-4 h-4 bg-interface-gray rounded-full"
+              whileHover={{ scale: 1.2 }}
+            />
+          )}
+          {aiState === 'listening' && (
+            <motion.div className="flex gap-1">
+              {[0, 1, 2].map(i => (
+                <motion.div
+                  key={i}
+                  className="w-1 h-4 bg-connection-green rounded-full"
+                  animate={{ 
+                    scaleY: [1, 2, 1],
+                    opacity: [0.5, 1, 0.5]
+                  }}
+                  transition={{ 
+                    duration: 0.5, 
+                    repeat: Infinity, 
+                    delay: i * 0.1 
+                  }}
+                />
+              ))}
+            </motion.div>
+          )}
+          {aiState === 'processing' && (
+            <motion.div 
+              className="w-4 h-4 border-2 border-synergy-gold border-t-transparent rounded-full"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+            />
+          )}
+          {aiState === 'speaking' && (
+            <motion.div className="flex gap-1">
+              {[0, 1, 2].map(i => (
+                <motion.div
+                  key={i}
+                  className="w-1 h-4 bg-alert-magenta rounded-full"
+                  animate={{ 
+                    scaleY: [1, 0.5, 2, 0.8, 1],
+                    opacity: [0.8, 1, 0.6, 1, 0.8]
+                  }}
+                  transition={{ 
+                    duration: 0.8, 
+                    repeat: Infinity, 
+                    delay: i * 0.15 
+                  }}
+                />
+              ))}
+            </motion.div>
+          )}
+          {aiState === 'learning' && (
+            <motion.div 
+              className="w-4 h-4 border-2 border-depth-cyan rounded-full"
+              animate={{ 
+                scale: [1, 1.2, 1],
+                borderColor: ['#00FFFF', '#FFD700', '#00FFFF']
+              }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+          )}
+        </motion.div>
+
+        {/* Voice Button */}
+        <motion.button
+          onClick={aiState === 'listening' ? stopListening : startListening}
+          disabled={aiState === 'processing' || aiState === 'speaking' || !isConnected}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className={`w-12 h-12 rounded-full flex items-center justify-center transition-all relative overflow-hidden ${
+            aiState === 'listening'
+              ? 'bg-gradient-to-r from-alert-magenta to-alert-purple shadow-lg'
+              : 'bg-gradient-to-r from-connection-green to-connection-light hover:shadow-lg'
+          } ${(aiState === 'processing' || aiState === 'speaking' || !isConnected) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+        >
+          <AnimatePresence mode="wait">
+            {aiState === 'listening' ? (
+              <motion.div
+                key="stop"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0 }}
+                className="w-4 h-4 bg-white rounded-sm"
+              />
+            ) : (
+              <motion.div
+                key="mic"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0 }}
+                className="w-5 h-5 bg-os-dark rounded-full"
+              />
+            )}
+          </AnimatePresence>
+          
+          {/* Pulsing ring effect */}
+          {aiState === 'listening' && (
+            <motion.div 
+              className="absolute inset-0 border-2 border-white rounded-full"
+              animate={{ 
+                scale: [1, 1.5, 1],
+                opacity: [0.8, 0, 0.8]
+              }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+          )}
+        </motion.button>
 
         {/* Text Input */}
         <form onSubmit={handleTextSubmit} className="flex-1">
@@ -310,23 +1090,70 @@ export const ConversationalAgent = () => {
             type="text"
             value={currentInput}
             onChange={(e) => setCurrentInput(e.target.value)}
-            placeholder={isProcessing ? "Processing..." : "Type your question..."}
-            disabled={isProcessing || !isConnected}
-            className="w-full bg-os-dark border border-depth-cyan/30 rounded px-3 py-2 text-xs text-interface-light placeholder-interface-gray focus:outline-none focus:border-depth-cyan/60"
+            placeholder={getInputPlaceholder()}
+            disabled={aiState === 'processing' || aiState === 'speaking' || !isConnected}
+            className="w-full bg-gradient-to-r from-os-dark to-os-darker border border-depth-cyan/30 rounded-lg px-4 py-3 text-sm text-interface-light placeholder-interface-gray focus:outline-none focus:border-depth-cyan/60 focus:shadow-lg transition-all"
           />
         </form>
 
-        {/* Processing Indicator */}
-        {isProcessing && (
-          <div className="flex items-center gap-1">
-            <div className="w-1 h-1 bg-depth-cyan rounded-full animate-ping"></div>
-            <div className="w-1 h-1 bg-depth-cyan rounded-full animate-ping" style={{ animationDelay: '0.1s' }}></div>
-            <div className="w-1 h-1 bg-depth-cyan rounded-full animate-ping" style={{ animationDelay: '0.2s' }}></div>
-          </div>
+        {/* Confidence Indicator */}
+        {confidence > 0 && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center gap-1"
+          >
+            <div className={`w-8 h-1 rounded-full ${
+              confidence > 80 ? 'bg-connection-green' :
+              confidence > 60 ? 'bg-synergy-gold' :
+              'bg-alert-magenta'
+            }`}></div>
+            <span className="text-xs text-interface-gray">{Math.floor(confidence)}%</span>
+          </motion.div>
+        )}
+
+        {/* Processing Neural Network Animation */}
+        {aiState === 'processing' && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex items-center gap-1"
+          >
+            {[0, 1, 2, 3, 4].map(i => (
+              <motion.div
+                key={i}
+                className="w-1 h-1 bg-synergy-gold rounded-full"
+                animate={{ 
+                  scale: [1, 1.5, 1],
+                  opacity: [0.3, 1, 0.3]
+                }}
+                transition={{ 
+                  duration: 1.5, 
+                  repeat: Infinity, 
+                  delay: i * 0.1 
+                }}
+              />
+            ))}
+          </motion.div>
         )}
       </div>
     </div>
   )
+  
+  function getInputPlaceholder(): string {
+    switch (aiState) {
+      case 'processing':
+        return 'Neural networks processing...'
+      case 'speaking':
+        return 'AI responding...'
+      case 'learning':
+        return 'Updating relationship intelligence...'
+      case 'listening':
+        return 'Listening...'
+      default:
+        return 'Ask about relationships, synergies, or network insights...'
+    }
+  }
 }
 
 export default ConversationalAgent

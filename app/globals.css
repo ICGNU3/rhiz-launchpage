@@ -378,6 +378,11 @@ body::before {
     }
   }
   
+  /* AI State Transitions */
+  .ai-state-transition {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
   /* Loading States */
   .loading-dots::after {
     content: '';
@@ -536,6 +541,279 @@ body::before {
     }
   }
   
+  /* AI Agent Specific Animations */
+  .ai-listening-ring {
+    position: absolute;
+    border: 2px solid #00FF88;
+    border-radius: 50%;
+    animation: listening-pulse 2s ease-in-out infinite;
+  }
+  
+  @keyframes listening-pulse {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.2);
+      opacity: 0.7;
+    }
+    100% {
+      transform: scale(1.4);
+      opacity: 0;
+    }
+  }
+  
+  .ai-processing-spinner {
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-top: 2px solid #FFD700;
+    border-radius: 50%;
+    animation: ai-spin 1s linear infinite;
+  }
+  
+  @keyframes ai-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .ai-speaking-bars {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+  
+  .ai-speaking-bar {
+    width: 3px;
+    background: #FF00FF;
+    border-radius: 2px;
+    animation: speaking-bounce 0.6s ease-in-out infinite alternate;
+  }
+  
+  .ai-speaking-bar:nth-child(1) { animation-delay: 0s; }
+  .ai-speaking-bar:nth-child(2) { animation-delay: 0.1s; }
+  .ai-speaking-bar:nth-child(3) { animation-delay: 0.2s; }
+  
+  @keyframes speaking-bounce {
+    0% { height: 8px; }
+    100% { height: 20px; }
+  }
+  
+  /* Neural Network Processing Animation */
+  .neural-processing {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .neural-processing::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 215, 0, 0.2),
+      transparent
+    );
+    animation: neural-scan 2s linear infinite;
+  }
+  
+  @keyframes neural-scan {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+  
+  /* AI Voice Waveform */
+  .voice-waveform {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 40px;
+  }
+  
+  .waveform-bar {
+    width: 3px;
+    background: linear-gradient(to top, #00FF88, #00FFFF);
+    border-radius: 2px;
+    animation: waveform-pulse 0.5s ease-in-out infinite alternate;
+  }
+  
+  @keyframes waveform-pulse {
+    0% { height: 8px; opacity: 0.5; }
+    100% { height: 32px; opacity: 1; }
+  }
+  
+  /* Thinking Dots Animation */
+  .thinking-dots {
+    display: flex;
+    gap: 4px;
+  }
+  
+  .thinking-dot {
+    width: 8px;
+    height: 8px;
+    background: #FFD700;
+    border-radius: 50%;
+    animation: thinking-bounce 1.4s ease-in-out infinite both;
+  }
+  
+  .thinking-dot:nth-child(1) { animation-delay: -0.32s; }
+  .thinking-dot:nth-child(2) { animation-delay: -0.16s; }
+  .thinking-dot:nth-child(3) { animation-delay: 0s; }
+  
+  @keyframes thinking-bounce {
+    0%, 80%, 100% {
+      transform: scale(0.8);
+      opacity: 0.5;
+    }
+    40% {
+      transform: scale(1.2);
+      opacity: 1;
+    }
+  }
+  
+  /* Confidence Meter */
+  .confidence-meter {
+    position: relative;
+    background: linear-gradient(
+      90deg,
+      #FF0080 0%,
+      #FFD700 50%,
+      #00FF88 100%
+    );
+    height: 4px;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  
+  .confidence-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+  
+  /* Synergy Pulse Effect */
+  .synergy-pulse {
+    position: relative;
+  }
+  
+  .synergy-pulse::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+      circle,
+      rgba(255, 215, 0, 0.3) 0%,
+      transparent 70%
+    );
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    animation: synergy-ripple 2s ease-out infinite;
+  }
+  
+  @keyframes synergy-ripple {
+    0% {
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(2);
+      opacity: 0;
+    }
+  }
+  
+  /* Entity Tag Animation */
+  .entity-tag {
+    animation: entity-appear 0.5s ease-out;
+  }
+  
+  @keyframes entity-appear {
+    0% {
+      transform: scale(0.8) translateY(10px);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  /* Relationship Graph Visualization */
+  .relationship-node {
+    transition: all 0.3s ease;
+  }
+  
+  .relationship-node:hover {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 10px currentColor);
+  }
+  
+  .relationship-edge {
+    stroke-dasharray: 5, 5;
+    animation: relationship-flow 3s linear infinite;
+  }
+  
+  @keyframes relationship-flow {
+    0% { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: -10; }
+  }
+  
+  /* Memory Recall Animation */
+  .memory-recall {
+    animation: memory-fade-in 0.8s ease-out;
+  }
+  
+  @keyframes memory-fade-in {
+    0% {
+      opacity: 0;
+      transform: translateY(20px) scale(0.9);
+    }
+    50% {
+      opacity: 0.5;
+      transform: translateY(10px) scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  /* Learning Progress Animation */
+  .learning-progress {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .learning-progress::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    animation: learning-shine 2s ease-in-out infinite;
+  }
+  
+  @keyframes learning-shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  
   /* Landscape mobile optimization */
   @media (max-width: 768px) and (orientation: landscape) {
     .min-h-screen {
@@ -544,6 +822,38 @@ body::before {
     
     .h-screen {
       height: 100vh;
+    }
+    
+    /* Optimize AI visualizations for landscape */
+    .voice-waveform {
+      height: 24px;
+    }
+    
+    .waveform-bar {
+      width: 2px;
+    }
+    
+    @keyframes waveform-pulse {
+      0% { height: 4px; opacity: 0.5; }
+      100% { height: 20px; opacity: 1; }
+    }
+  }
+  
+  /* Reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    .neural-processing::before,
+    .waveform-bar,
+    .thinking-dot,
+    .synergy-pulse::after,
+    .relationship-edge,
+    .learning-progress::after,
+    .ai-listening-ring,
+    .ai-processing-spinner {
+      animation: none;
+    }
+    
+    .ai-state-transition {
+      transition: none;
     }
   }
 }
