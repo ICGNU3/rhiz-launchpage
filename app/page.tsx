@@ -6,6 +6,23 @@ import TypewriterText from '../components/TypewriterText'
 import InteractiveTerminal, { InteractiveTerminalRef } from '../components/InteractiveTerminal'
 import ElevenLabsWidget from '../components/ElevenLabsWidget'
 
+// Mobile detection hook
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false)
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+  
+  return isMobile
+}
+
 // Synergy Discovery Component
 const SynergyMatrix = ({ connections }: { connections: any[] }) => {
   const [hoveredNode, setHoveredNode] = useState<number | null>(null)
@@ -254,6 +271,7 @@ const StickyCTA = ({ spotsRemaining }: { spotsRemaining: number }) => {
 export default function Home() {
   const [spotsRemaining] = useState(117)
   const [depthScore, setDepthScore] = useState(0)
+  const isMobile = useIsMobile()
   
   // Add refs for DOM elements
   const installButtonRef = useRef<HTMLButtonElement>(null)
@@ -425,38 +443,44 @@ export default function Home() {
       {/* Sticky CTA */}
       <StickyCTA spotsRemaining={spotsRemaining} />
 
-      {/* OS Status Bar */}
+      {/* OS Status Bar - Mobile Optimized */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-os-darker/95 backdrop-blur-md border-b border-os-border">
         <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="font-mono text-sm text-synergy-gold">
-              RELATIONAL_OS
+          <div className="flex items-center gap-2 md:gap-4">
+            <div className="font-mono text-xs md:text-sm text-synergy-gold">
+              {isMobile ? 'RHIZ' : 'RELATIONAL_OS'}
             </div>
-            <div className="text-xs text-interface-light">v.150.ALPHA</div>
+            <div className="text-xs text-interface-light">v.150</div>
           </div>
           
-          <div className="flex items-center gap-6">
-            <div className="text-xs font-mono text-depth-cyan">
-              NETWORK_DEPTH: SCANNING...
-            </div>
-            <div className="text-xs font-mono text-connection-green">
-              SYNERGIES: ACTIVE
-            </div>
+          <div className="flex items-center gap-2 md:gap-6">
+            {!isMobile && (
+              <>
+                <div className="text-xs font-mono text-depth-cyan">
+                  NETWORK_DEPTH: SCANNING...
+                </div>
+                <div className="text-xs font-mono text-connection-green">
+                  SYNERGIES: ACTIVE
+                </div>
+              </>
+            )}
             <div className="text-xs font-mono text-alert-magenta animate-pulse">
-              {spotsRemaining}/150 LICENSES
+              {spotsRemaining}/150
             </div>
           </div>
         </div>
       </div>
 
-      {/* Hero Section - Full Viewport Control Room */}
-      <section className="h-screen relative overflow-hidden bg-gradient-to-br from-os-dark via-os-darker to-os-dark">
-        {/* Multi-Layer Animated Backgrounds */}
+      {/* Hero Section - Mobile-First Responsive Control Room */}
+      <section className="min-h-screen relative overflow-hidden bg-gradient-to-br from-os-dark via-os-darker to-os-dark">
+        {/* Multi-Layer Animated Backgrounds - Optimized for Mobile */}
         <div className="absolute inset-0">
-          {/* Primary Grid - More Dense */}
-          <div className="absolute inset-0 opacity-15">
-            <div className="grid grid-cols-20 grid-rows-12 h-full w-full">
-              {Array.from({ length: 240 }).map((_, i) => (
+          {/* Primary Grid - Responsive Density */}
+          <div className="absolute inset-0 opacity-10 md:opacity-15">
+            <div className={`grid h-full w-full ${
+              isMobile ? 'grid-cols-8 grid-rows-12' : 'grid-cols-20 grid-rows-12'
+            }`}>
+              {Array.from({ length: isMobile ? 96 : 240 }).map((_, i) => (
                 <motion.div
                   key={i}
                   className="border border-synergy-gold/30"
@@ -468,9 +492,9 @@ export default function Home() {
             </div>
           </div>
           
-          {/* Floating Data Particles */}
+          {/* Floating Data Particles - Reduced on Mobile */}
           <div className="absolute inset-0 pointer-events-none">
-            {Array.from({ length: 50 }).map((_, i) => (
+            {Array.from({ length: isMobile ? 15 : 50 }).map((_, i) => (
               <motion.div
                 key={`particle-${i}`}
                 className="absolute w-1 h-1 bg-depth-cyan rounded-full"
@@ -480,12 +504,12 @@ export default function Home() {
                   opacity: 0
                 }}
                 animate={{
-                  x: [0, 1920],
-                  y: [0, 1080],
+                  x: [0, isMobile ? 390 : 1920],
+                  y: [0, isMobile ? 844 : 1080],
                   opacity: [0, 1, 0]
                 }}
                 transition={{ 
-                  duration: 8 + (i % 4), 
+                  duration: isMobile ? 12 + (i % 4) : 8 + (i % 4), 
                   repeat: Infinity, 
                   delay: i * 0.1,
                   ease: "linear"
@@ -494,22 +518,28 @@ export default function Home() {
             ))}
           </div>
           
-          {/* Scanning Lines */}
-          <motion.div 
-            className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-synergy-gold to-transparent"
-            animate={{ y: [0, 1080] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-          />
-          <motion.div 
-            className="absolute top-0 left-0 w-0.5 h-full bg-gradient-to-b from-transparent via-depth-cyan to-transparent"
-            animate={{ x: [0, 1920] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "linear", delay: 2 }}
-          />
+          {/* Scanning Lines - Mobile Optimized */}
+          {!isMobile && (
+            <>
+              <motion.div 
+                className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-synergy-gold to-transparent"
+                animate={{ y: [0, 1080] }}
+                transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+              />
+              <motion.div 
+                className="absolute top-0 left-0 w-0.5 h-full bg-gradient-to-b from-transparent via-depth-cyan to-transparent"
+                animate={{ x: [0, 1920] }}
+                transition={{ duration: 8, repeat: Infinity, ease: "linear", delay: 2 }}
+              />
+            </>
+          )}
           
-          {/* Radar Sweep */}
+          {/* Radar Sweep - Responsive Size */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <motion.div 
-              className="w-96 h-96 border border-connection-green/30 rounded-full"
+              className={`border border-connection-green/30 rounded-full ${
+                isMobile ? 'w-48 h-48' : 'w-96 h-96'
+              }`}
               animate={{ scale: [0.8, 1.2, 0.8] }}
               transition={{ duration: 4, repeat: Infinity }}
             />
@@ -521,15 +551,25 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto relative z-10 h-full flex flex-col">
-          {/* Floating Status Panels */}
-          <div className="absolute top-16 left-4 right-4 z-20">
-            <div className="flex justify-between items-start">
-              {/* Top Left HUD */}
+        <div className="max-w-7xl mx-auto relative z-10 min-h-screen flex flex-col px-4">
+          {/* Floating Status Panels - Mobile Responsive */}
+          <div className={`absolute z-20 ${
+            isMobile 
+              ? 'top-20 left-2 right-2' 
+              : 'top-16 left-4 right-4'
+          }`}>
+            <div className={`${
+              isMobile 
+                ? 'flex flex-col gap-3' 
+                : 'flex justify-between items-start'
+            }`}>
+              {/* System Status HUD - Mobile Optimized */}
               <motion.div 
-                className="bg-os-darker/90 backdrop-blur-md border border-synergy-gold/50 rounded-lg p-4 shadow-2xl"
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 1, x: 0 }}
+                className={`bg-os-darker/90 backdrop-blur-md border border-synergy-gold/50 rounded-lg shadow-2xl ${
+                  isMobile ? 'p-3' : 'p-4'
+                }`}
+                initial={{ opacity: 0, x: isMobile ? 0 : -50, y: isMobile ? -20 : 0 }}
+                animate={{ opacity: 1, x: 0, y: 0 }}
                 transition={{ delay: 1 }}
               >
                 <div className="text-xs font-mono text-synergy-gold mb-2">SYSTEM STATUS</div>
@@ -543,13 +583,13 @@ export default function Home() {
                 </div>
               </motion.div>
               
-
-              
-              {/* Top Right Metrics */}
+              {/* Network Metrics - Mobile Optimized */}
               <motion.div 
-                className="bg-os-darker/90 backdrop-blur-md border border-depth-cyan/50 rounded-lg p-4 shadow-2xl"
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
+                className={`bg-os-darker/90 backdrop-blur-md border border-depth-cyan/50 rounded-lg shadow-2xl ${
+                  isMobile ? 'p-3' : 'p-4'
+                }`}
+                initial={{ opacity: 0, x: isMobile ? 0 : 50, y: isMobile ? -20 : 0 }}
+                animate={{ opacity: 1, x: 0, y: 0 }}
                 transition={{ delay: 1.2 }}
               >
                 <div className="text-xs font-mono text-depth-cyan mb-2">NETWORK METRICS</div>
@@ -562,18 +602,26 @@ export default function Home() {
             </div>
           </div>
           
-          {/* Central Command Header */}
-          <div className="text-center mb-8 mt-32 flex-grow flex flex-col justify-center">
-            {/* Holographic Title Display */}
+          {/* Central Command Header - Mobile First */}
+          <div className={`text-center flex-grow flex flex-col justify-center ${
+            isMobile ? 'mt-24 mb-6 px-2' : 'mt-32 mb-8'
+          }`}>
+            {/* Holographic Title Display - Responsive */}
             <motion.div 
-              className="relative mb-8"
+              className={`relative ${
+                isMobile ? 'mb-6' : 'mb-8'
+              }`}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 2 }}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-synergy-gold/20 via-transparent to-depth-cyan/20 rounded-full blur-3xl"></div>
             
-              <h1 className="relative text-7xl md:text-8xl lg:text-9xl font-bold leading-tight mb-6">
+              <h1 className={`relative font-bold leading-tight mb-6 ${
+                isMobile 
+                  ? 'text-6xl' 
+                  : 'text-7xl md:text-8xl lg:text-9xl'
+              }`}>
                 <div className="absolute inset-0 blur-sm bg-gradient-to-r from-synergy-gold via-depth-cyan to-synergy-gold bg-clip-text text-transparent">
                   RHIZ
                 </div>
@@ -582,19 +630,27 @@ export default function Home() {
                   className="relative screen-light bg-gradient-to-r from-synergy-gold via-depth-cyan to-synergy-gold bg-clip-text text-transparent bg-300% animate-gradient" 
                   speed={80}
                 />
-                {/* Glitch Effect */}
-                <motion.div 
-                  className="absolute inset-0 text-synergy-gold opacity-20"
-                  animate={{ x: [-2, 2, -1, 1, 0] }}
-                  transition={{ duration: 0.2, repeat: Infinity, repeatDelay: 3 }}
-                >
-                  RHIZ
-                </motion.div>
+                {/* Glitch Effect - Reduced on Mobile */}
+                {!isMobile && (
+                  <motion.div 
+                    className="absolute inset-0 text-synergy-gold opacity-20"
+                    animate={{ x: [-2, 2, -1, 1, 0] }}
+                    transition={{ duration: 0.2, repeat: Infinity, repeatDelay: 3 }}
+                  >
+                    RHIZ
+                  </motion.div>
+                )}
               </h1>
             </motion.div>
             
-            <div className="text-2xl sm:text-3xl text-os-light leading-relaxed mb-8 max-w-4xl mx-auto relative">
-              <div className="bg-os-darker/30 backdrop-blur-sm border border-synergy-gold/30 rounded-lg p-6 shadow-2xl">
+            <div className={`text-os-light leading-relaxed max-w-4xl mx-auto relative ${
+              isMobile 
+                ? 'text-lg mb-6' 
+                : 'text-2xl sm:text-3xl mb-8'
+            }`}>
+              <div className={`bg-os-darker/30 backdrop-blur-sm border border-synergy-gold/30 rounded-lg shadow-2xl ${
+                isMobile ? 'p-4' : 'p-6'
+              }`}>
                 <TypewriterText 
                   text="The operating system for human relationships."
                   delay={1500}
@@ -608,16 +664,20 @@ export default function Home() {
                   speed={35}
                 />
               </div>
-              {/* Data streams around the subtitle */}
-              <div className="absolute -top-2 -left-2 w-full h-full border border-depth-cyan/20 rounded-lg pointer-events-none">
-                <div className="absolute top-0 left-0 w-8 h-0.5 bg-depth-cyan animate-pulse"></div>
-                <div className="absolute bottom-0 right-0 w-8 h-0.5 bg-synergy-gold animate-pulse"></div>
-              </div>
+              {/* Data streams around the subtitle - Hidden on Mobile */}
+              {!isMobile && (
+                <div className="absolute -top-2 -left-2 w-full h-full border border-depth-cyan/20 rounded-lg pointer-events-none">
+                  <div className="absolute top-0 left-0 w-8 h-0.5 bg-depth-cyan animate-pulse"></div>
+                  <div className="absolute bottom-0 right-0 w-8 h-0.5 bg-synergy-gold animate-pulse"></div>
+                </div>
+              )}
             </div>
 
-            {/* Mega CTA - Impossible to Miss */}
+            {/* Mega CTA - Mobile Optimized */}
             <motion.div 
-              className="relative mb-12"
+              className={`relative ${
+                isMobile ? 'mb-8' : 'mb-12'
+              }`}
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 5, duration: 0.8 }}
@@ -627,61 +687,86 @@ export default function Home() {
                 ref={installButtonRef}
                 type="button" 
                 data-action="install"
-                className="relative button-glow bg-gradient-to-r from-synergy-gold to-synergy-light text-os-dark px-16 py-8 font-bold text-2xl md:text-3xl rounded-2xl hover:from-synergy-light hover:to-synergy-gold transition-all duration-300 transform hover:scale-105 focus:ring-4 focus:ring-synergy-light/50 focus:ring-offset-2 focus:ring-offset-os-dark shadow-2xl"
+                className={`relative button-glow bg-gradient-to-r from-synergy-gold to-synergy-light text-os-dark font-bold rounded-2xl hover:from-synergy-light hover:to-synergy-gold transition-all duration-300 transform hover:scale-105 focus:ring-4 focus:ring-synergy-light/50 focus:ring-offset-2 focus:ring-offset-os-dark shadow-2xl ${
+                  isMobile 
+                    ? 'px-8 py-6 text-xl w-full max-w-sm mx-auto block' 
+                    : 'px-16 py-8 text-2xl md:text-3xl'
+                }`}
                 aria-label="Join the first 150 founding members for $777 lifetime license"
               >
-                <div className="flex items-center justify-center gap-4">
-                  <span>SECURE YOUR SPOT</span>
-                  <div className="bg-os-dark/20 px-4 py-2 rounded-lg">
+                <div className={`flex items-center justify-center ${
+                  isMobile ? 'gap-2 flex-col' : 'gap-4'
+                }`}>
+                  <span className={isMobile ? 'text-lg' : ''}>SECURE YOUR SPOT</span>
+                  <div className={`bg-os-dark/20 rounded-lg ${
+                    isMobile ? 'px-3 py-1 text-lg' : 'px-4 py-2'
+                  }`}>
                     <span className="font-mono">$777</span>
                   </div>
                 </div>
               </button>
               
               <motion.div 
-                className="mt-6 text-lg text-interface-light"
+                className={`text-interface-light ${
+                  isMobile ? 'mt-4 text-sm text-center' : 'mt-6 text-lg'
+                }`}
                 animate={{ opacity: [0.7, 1, 0.7] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                LIFETIME LICENSE • ROOT ACCESS • 10 USER INVITES
+                {isMobile 
+                  ? 'LIFETIME LICENSE • ROOT ACCESS'
+                  : 'LIFETIME LICENSE • ROOT ACCESS • 10 USER INVITES'
+                }
               </motion.div>
               
-              <div className="mt-4 flex justify-center items-center gap-8 text-sm text-interface-gray">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 bg-connection-green rounded-full animate-pulse"></span>
-                  <span>Press Ctrl+I to focus</span>
+              {!isMobile && (
+                <div className="mt-4 flex justify-center items-center gap-8 text-sm text-interface-gray">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-connection-green rounded-full animate-pulse"></span>
+                    <span>Press Ctrl+I to focus</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-depth-cyan rounded-full animate-pulse"></span>
+                    <span>Press Ctrl+T for terminal</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 bg-depth-cyan rounded-full animate-pulse"></span>
-                  <span>Press Ctrl+T for terminal</span>
-                </div>
-              </div>
+              )}
             </motion.div>
           </div>
 
-          {/* Bottom Command Center - Floating Panels */}
-          <div className="absolute bottom-8 left-8 right-8">
-            <div className="grid lg:grid-cols-4 gap-4">
+          {/* Bottom Command Center - Mobile Responsive */}
+          <div className={`absolute left-4 right-4 ${
+            isMobile ? 'bottom-4' : 'bottom-8 left-8 right-8'
+          }`}>
+            <div className={`gap-4 ${
+              isMobile 
+                ? 'grid grid-cols-1'
+                : 'grid lg:grid-cols-4'
+            }`}>
             
-            {/* Command Terminal - Compact */}
-            <motion.div 
-              className="bg-os-darker/95 backdrop-blur-md border border-connection-green/50 rounded-lg p-4 shadow-2xl"
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 6, duration: 0.8 }}
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-2 h-2 bg-connection-green rounded-full animate-pulse"></div>
-                <span className="font-mono text-connection-green text-xs">TERMINAL</span>
-              </div>
-              <div className="h-24 overflow-hidden">
-                <InteractiveTerminal ref={terminalInputRef} />
-              </div>
-            </motion.div>
+            {/* Command Terminal - Mobile Hidden */}
+            {!isMobile && (
+              <motion.div 
+                className="bg-os-darker/95 backdrop-blur-md border border-connection-green/50 rounded-lg p-4 shadow-2xl"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 6, duration: 0.8 }}
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-2 h-2 bg-connection-green rounded-full animate-pulse"></div>
+                  <span className="font-mono text-connection-green text-xs">TERMINAL</span>
+                </div>
+                <div className="h-24 overflow-hidden">
+                  <InteractiveTerminal ref={terminalInputRef} />
+                </div>
+              </motion.div>
+            )}
 
-            {/* MEGA AI Assistant - Takes Center Stage */}
+            {/* MEGA AI Assistant - Mobile Optimized */}
             <motion.div 
-              className="lg:col-span-2 bg-gradient-to-br from-synergy-gold/20 via-os-darker/95 to-depth-cyan/20 backdrop-blur-md border-2 border-synergy-gold/70 rounded-lg p-6 shadow-[0_0_30px_rgba(255,215,0,0.3)]"
+              className={`bg-gradient-to-br from-synergy-gold/20 via-os-darker/95 to-depth-cyan/20 backdrop-blur-md border-2 border-synergy-gold/70 rounded-lg shadow-[0_0_30px_rgba(255,215,0,0.3)] ${
+                isMobile ? 'p-4 col-span-1' : 'lg:col-span-2 p-6'
+              }`}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 6.2, duration: 0.8 }}
@@ -692,43 +777,61 @@ export default function Home() {
                 <div className="w-4 h-4 bg-synergy-gold rounded-full animate-pulse shadow-lg"></div>
               </div>
               
-              <div className="flex items-center justify-between mb-4">
+              <div className={`flex justify-between mb-4 ${
+                isMobile ? 'flex-col gap-3' : 'items-center'
+              }`}>
                 <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 bg-gradient-to-r from-synergy-gold to-depth-cyan rounded-full animate-pulse shadow-lg"></div>
-                  <h3 className="text-xl font-mono text-synergy-gold font-bold tracking-wider">
-                    AI_RELATIONSHIP_ASSISTANT.exe
+                  <div className={`bg-gradient-to-r from-synergy-gold to-depth-cyan rounded-full animate-pulse shadow-lg ${
+                    isMobile ? 'w-4 h-4' : 'w-6 h-6'
+                  }`}></div>
+                  <h3 className={`font-mono text-synergy-gold font-bold tracking-wider ${
+                    isMobile ? 'text-sm' : 'text-xl'
+                  }`}>
+                    {isMobile ? 'AI_ASSISTANT.exe' : 'AI_RELATIONSHIP_ASSISTANT.exe'}
                   </h3>
                 </div>
                 <div className="flex items-center gap-2 bg-connection-green/20 px-3 py-1 rounded-full">
                   <div className="w-2 h-2 bg-connection-green rounded-full animate-pulse"></div>
-                  <span className="text-xs font-mono text-connection-green">FULLY OPERATIONAL</span>
+                  <span className="text-xs font-mono text-connection-green">OPERATIONAL</span>
                 </div>
               </div>
               
-              <div className="grid grid-cols-3 gap-3 mb-4 text-xs">
-                <div className="bg-os-dark/70 p-3 rounded border border-depth-cyan/50">
-                  <div className="text-depth-cyan font-mono mb-1">› VOICE STATUS</div>
-                  <div className="text-interface-light">Real-time processing</div>
+              {!isMobile && (
+                <div className="grid grid-cols-3 gap-3 mb-4 text-xs">
+                  <div className="bg-os-dark/70 p-3 rounded border border-depth-cyan/50">
+                    <div className="text-depth-cyan font-mono mb-1">› VOICE STATUS</div>
+                    <div className="text-interface-light">Real-time processing</div>
+                  </div>
+                  <div className="bg-os-dark/70 p-3 rounded border border-synergy-gold/50">
+                    <div className="text-synergy-gold font-mono mb-1">› AI ENGINE</div>
+                    <div className="text-interface-light">Relationship intelligence</div>
+                  </div>
+                  <div className="bg-os-dark/70 p-3 rounded border border-alert-magenta/50">
+                    <div className="text-alert-magenta font-mono mb-1">› PRIORITY</div>
+                    <div className="text-interface-light">Maximum security</div>
+                  </div>
                 </div>
-                <div className="bg-os-dark/70 p-3 rounded border border-synergy-gold/50">
-                  <div className="text-synergy-gold font-mono mb-1">› AI ENGINE</div>
-                  <div className="text-interface-light">Relationship intelligence</div>
-                </div>
-                <div className="bg-os-dark/70 p-3 rounded border border-alert-magenta/50">
-                  <div className="text-alert-magenta font-mono mb-1">› PRIORITY</div>
-                  <div className="text-interface-light">Maximum security</div>
-                </div>
-              </div>
+              )}
               
-              {/* STAR OF THE SHOW - ElevenLabs Widget */}
-              <div className="relative bg-gradient-to-r from-os-dark via-os-darker to-os-dark rounded-lg p-6 border-2 border-synergy-gold/70 shadow-[0_0_20px_rgba(255,215,0,0.2)]">
+              {/* STAR OF THE SHOW - ElevenLabs Widget - Mobile Optimized */}
+              <div className={`relative bg-gradient-to-r from-os-dark via-os-darker to-os-dark rounded-lg border-2 border-synergy-gold/70 shadow-[0_0_20px_rgba(255,215,0,0.2)] ${
+                isMobile ? 'p-4' : 'p-6'
+              }`}>
                 <div className="absolute inset-0 bg-gradient-to-r from-synergy-gold/5 via-transparent to-depth-cyan/5 rounded-lg"></div>
-                <div className="relative flex flex-col items-center justify-center min-h-[200px]">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-3 h-3 bg-synergy-gold rounded-full animate-pulse"></div>
-                    <span className="text-sm font-mono text-synergy-gold font-bold">VOICE_INTERFACE.active</span>
-                    <div className="ml-auto flex gap-1">
-                      {Array.from({ length: 5 }).map((_, i) => (
+                <div className={`relative flex flex-col items-center justify-center ${
+                  isMobile ? 'min-h-[180px]' : 'min-h-[200px]'
+                }`}>
+                  <div className={`flex items-center mb-4 ${
+                    isMobile ? 'gap-2 flex-col' : 'gap-3'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-synergy-gold rounded-full animate-pulse"></div>
+                      <span className={`font-mono text-synergy-gold font-bold ${
+                        isMobile ? 'text-xs' : 'text-sm'
+                      }`}>VOICE_INTERFACE.active</span>
+                    </div>
+                    <div className="flex gap-1">
+                      {Array.from({ length: isMobile ? 3 : 5 }).map((_, i) => (
                         <motion.div
                           key={i}
                           className="w-1 h-4 bg-depth-cyan rounded-full"
@@ -741,40 +844,51 @@ export default function Home() {
                   <div className="flex-1 flex items-center justify-center w-full">
                     <ElevenLabsWidget />
                   </div>
-                  <div className="mt-3 text-xs text-center text-interface-light">
-                    <span className="text-synergy-gold">◆</span> Ask about relationship insights, synergy opportunities, or network optimization <span className="text-synergy-gold">◆</span>
+                  <div className={`text-center text-interface-light ${
+                    isMobile ? 'mt-2 text-xs px-2' : 'mt-3 text-xs'
+                  }`}>
+                    <span className="text-synergy-gold">◆</span> 
+                    {isMobile 
+                      ? 'Ask about relationship insights'
+                      : 'Ask about relationship insights, synergy opportunities, or network optimization'
+                    } 
+                    <span className="text-synergy-gold">◆</span>
                   </div>
                 </div>
               </div>
             </motion.div>
 
-            {/* Depth Scanner - Compact */}
-            <motion.div 
-              className="bg-os-darker/95 backdrop-blur-md border border-depth-cyan/50 rounded-lg p-4 shadow-2xl"
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 6.4, duration: 0.8 }}
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-2 h-2 bg-depth-cyan rounded-full animate-pulse"></div>
-                <span className="font-mono text-depth-cyan text-xs">DEPTH_SCAN</span>
-              </div>
-              <div className="h-20 overflow-hidden">
-                <div className="w-full bg-os-dark rounded-full h-2 mb-2">
-                  <motion.div 
-                    className="bg-gradient-to-r from-depth-blue to-depth-cyan h-2 rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${depthScore}%` }}
-                    transition={{ duration: 1.5, ease: "easeOut" }}
-                  />
+            {/* Depth Scanner - Mobile Hidden */}
+            {!isMobile && (
+              <motion.div 
+                className="bg-os-darker/95 backdrop-blur-md border border-depth-cyan/50 rounded-lg p-4 shadow-2xl"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 6.4, duration: 0.8 }}
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-2 h-2 bg-depth-cyan rounded-full animate-pulse"></div>
+                  <span className="font-mono text-depth-cyan text-xs">DEPTH_SCAN</span>
                 </div>
-                <div className="text-xs text-depth-cyan font-mono">{depthScore}% analyzed</div>
-              </div>
-            </motion.div>
+                <div className="h-20 overflow-hidden">
+                  <div className="w-full bg-os-dark rounded-full h-2 mb-2">
+                    <motion.div 
+                      className="bg-gradient-to-r from-depth-blue to-depth-cyan h-2 rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${depthScore}%` }}
+                      transition={{ duration: 1.5, ease: "easeOut" }}
+                    />
+                  </div>
+                  <div className="text-xs text-depth-cyan font-mono">{depthScore}% analyzed</div>
+                </div>
+              </motion.div>
+            )}
 
-            {/* Urgency Counter - Critical Alert */}
+            {/* Urgency Counter - Mobile Simplified */}
             <motion.div 
-              className="bg-gradient-to-br from-alert-magenta/30 via-os-darker/95 to-os-dark backdrop-blur-md border-2 border-alert-magenta/70 rounded-lg p-4 shadow-[0_0_20px_rgba(255,0,128,0.3)]"
+              className={`bg-gradient-to-br from-alert-magenta/30 via-os-darker/95 to-os-dark backdrop-blur-md border-2 border-alert-magenta/70 rounded-lg shadow-[0_0_20px_rgba(255,0,128,0.3)] ${
+                isMobile ? 'p-3' : 'p-4'
+              }`}
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 6.6, duration: 0.8 }}
@@ -785,7 +899,9 @@ export default function Home() {
                   <span className="font-mono text-alert-magenta font-bold text-xs">CRITICAL</span>
                 </div>
                 
-                <div className="text-2xl font-bold text-alert-magenta font-mono">
+                <div className={`font-bold text-alert-magenta font-mono ${
+                  isMobile ? 'text-xl' : 'text-2xl'
+                }`}>
                   {spotsRemaining}
                 </div>
                 
@@ -805,45 +921,57 @@ export default function Home() {
             </motion.div>
           </div>
           
-          {/* Floating Corner Displays */}
-          <div className="absolute bottom-4 left-4">
-            <motion.div 
-              className="bg-os-darker/90 backdrop-blur-md border border-connection-green/50 rounded-lg p-3 shadow-lg"
-              animate={{ opacity: [0.7, 1, 0.7] }}
-              transition={{ duration: 3, repeat: Infinity }}
-            >
-              <div className="text-xs font-mono text-connection-green mb-1">NETWORK STATUS</div>
-              <div className="text-xs text-interface-light">94 synergies active</div>
-            </motion.div>
-          </div>
-          
-          <div className="absolute bottom-4 right-4">
-            <motion.div 
-              className="bg-os-darker/90 backdrop-blur-md border border-depth-cyan/50 rounded-lg p-3 shadow-lg"
-              animate={{ scale: [1, 1.05, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              <div className="text-xs font-mono text-depth-cyan mb-1">SYSTEM LOAD</div>
-              <div className="text-xs text-interface-light">Optimal performance</div>
-            </motion.div>
-          </div>
+          {/* Floating Corner Displays - Hidden on Mobile */}
+          {!isMobile && (
+            <>
+              <div className="absolute bottom-4 left-4">
+                <motion.div 
+                  className="bg-os-darker/90 backdrop-blur-md border border-connection-green/50 rounded-lg p-3 shadow-lg"
+                  animate={{ opacity: [0.7, 1, 0.7] }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                >
+                  <div className="text-xs font-mono text-connection-green mb-1">NETWORK STATUS</div>
+                  <div className="text-xs text-interface-light">94 synergies active</div>
+                </motion.div>
+              </div>
+              
+              <div className="absolute bottom-4 right-4">
+                <motion.div 
+                  className="bg-os-darker/90 backdrop-blur-md border border-depth-cyan/50 rounded-lg p-3 shadow-lg"
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <div className="text-xs font-mono text-depth-cyan mb-1">SYSTEM LOAD</div>
+                  <div className="text-xs text-interface-light">Optimal performance</div>
+                </motion.div>
+              </div>
+            </>
+          )}
         </div>
         </div>
       </section>
 
-      {/* Core Features Section */}
-      <section className="py-8 px-4 sm:px-6 lg:px-8 bg-os-darker/50">
+      {/* Core Features Section - Mobile Optimized */}
+      <section className={`py-8 px-4 sm:px-6 lg:px-8 bg-os-darker/50 ${
+        isMobile ? 'pt-4' : ''
+      }`}>
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-3">
+            <h2 className={`font-bold mb-3 ${
+              isMobile ? 'text-2xl' : 'text-3xl sm:text-4xl'
+            }`}>
               <span className="screen-light">SYSTEM CAPABILITIES</span>
             </h2>
-            <p className="text-lg text-interface-light max-w-3xl mx-auto">
+            <p className={`text-interface-light max-w-3xl mx-auto ${
+              isMobile ? 'text-base px-2' : 'text-lg'
+            }`}>
               Transform how you understand and nurture relationships
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className={`gap-6 ${
+            isMobile ? 'grid grid-cols-1 space-y-4' : 'grid md:grid-cols-3'
+          }`}>
             {features.map((feature, index) => (
               <motion.div
                 key={index}
@@ -866,15 +994,19 @@ export default function Home() {
 
 
       {/* How It Works */}
-      <section className="py-8 px-4 sm:px-6 lg:px-8 bg-os-darker/50">
+      <section className="py-4 md:py-8 px-4 sm:px-6 lg:px-8 bg-os-darker/50">
         <div className="max-w-6xl mx-auto">
           <OSTerminal>
             <div className="space-y-8">
-              <h2 className="text-2xl sm:text-3xl font-bold text-synergy-gold mb-6">
+              <h2 className={`font-bold text-synergy-gold mb-6 ${
+                isMobile ? 'text-xl' : 'text-2xl sm:text-3xl'
+              }`}>
                 SYSTEM_ARCHITECTURE.md
               </h2>
               
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className={`gap-6 ${
+                isMobile ? 'space-y-6' : 'grid md:grid-cols-2'
+              }`}>
                 <div>
                   <h3 className="font-mono text-depth-cyan mb-6 text-lg">INPUT_LAYER</h3>
                   <div className="space-y-4">
@@ -920,16 +1052,22 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Exclusivity Timeline */}
-      <section className="py-8 px-4 sm:px-6 lg:px-8">
+      {/* Exclusivity Timeline - Mobile Stacked */}
+      <section className={`py-8 px-4 sm:px-6 lg:px-8 ${
+        isMobile ? 'py-4' : ''
+      }`}>
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-3">
+            <h2 className={`font-bold mb-3 ${
+              isMobile ? 'text-2xl' : 'text-3xl sm:text-4xl'
+            }`}>
               <span className="screen-light">DEPLOYMENT PHASES</span>
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className={`gap-6 ${
+            isMobile ? 'grid grid-cols-1 space-y-4' : 'grid md:grid-cols-3'
+          }`}>
             {deploymentPhases.map((phase, index) => (
               <div key={index} className="interface-border rounded-lg p-6 bg-os-darker/80">
                 <div className={`font-mono text-xs ${phase.color} mb-2`}>
@@ -947,16 +1085,22 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Pricing Comparison */}
-      <section className="py-8 px-4 sm:px-6 lg:px-8 bg-os-darker/50">
+      {/* Pricing Comparison - Mobile Friendly */}
+      <section className={`py-8 px-4 sm:px-6 lg:px-8 bg-os-darker/50 ${
+        isMobile ? 'py-4' : ''
+      }`}>
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-3">
+            <h2 className={`font-bold mb-3 ${
+              isMobile ? 'text-2xl' : 'text-3xl sm:text-4xl'
+            }`}>
               <span className="screen-light">LICENSE COMPARISON</span>
             </h2>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-6">
+          <div className={`gap-6 ${
+            isMobile ? 'grid grid-cols-1 space-y-4' : 'grid lg:grid-cols-3'
+          }`}>
             {pricingPlans.map((plan, index) => (
               <div 
                 key={index} 
@@ -998,11 +1142,14 @@ export default function Home() {
                   
                   <button 
                     type="button"
-                    className={`w-full py-3 px-4 font-mono font-bold transition-all ${
+                    className={`w-full font-mono font-bold transition-all touch-manipulation ${
                       plan.highlight 
                         ? 'bg-synergy-gold text-os-dark hover:bg-synergy-light' 
                         : 'bg-interface-dark text-interface-gray cursor-not-allowed'
+                    } ${
+                      isMobile ? 'py-4 px-3 text-sm' : 'py-3 px-4'
                     }`}
+                    style={{ minHeight: isMobile ? '48px' : 'auto' }}
                     disabled={!plan.highlight}
                   >
                     {plan.cta}
@@ -1014,25 +1161,45 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-os-dark to-os-darker">
+      {/* Final CTA - Mobile Optimized */}
+      <section className={`bg-gradient-to-b from-os-dark to-os-darker ${
+        isMobile ? 'py-8 px-4' : 'py-12 px-4 sm:px-6 lg:px-8'
+      }`}>
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-block px-6 py-3 bg-alert-magenta/20 border border-alert-magenta rounded-lg mb-8 animate-pulse">
-            <span className="font-mono text-alert-magenta font-semibold">
+          <div className={`inline-block bg-alert-magenta/20 border border-alert-magenta rounded-lg animate-pulse ${
+            isMobile ? 'px-4 py-2 mb-6' : 'px-6 py-3 mb-8'
+          }`}>
+            <span className={`font-mono text-alert-magenta font-semibold ${
+              isMobile ? 'text-sm' : ''
+            }`}>
               CRITICAL: {spotsRemaining} LICENSES REMAINING
             </span>
           </div>
           
-          <h2 className="text-4xl sm:text-5xl font-bold mb-8 leading-tight">
-            <span className="screen-light">INITIALIZE YOUR RELATIONAL OS</span>
+          <h2 className={`font-bold leading-tight ${
+            isMobile ? 'text-2xl mb-6' : 'text-4xl sm:text-5xl mb-8'
+          }`}>
+            <span className="screen-light">
+              {isMobile ? 'INITIALIZE RELATIONAL OS' : 'INITIALIZE YOUR RELATIONAL OS'}
+            </span>
           </h2>
           
-          <p className="text-xl sm:text-2xl text-os-light mb-8 max-w-2xl mx-auto leading-relaxed">
+          <p className={`text-os-light max-w-2xl mx-auto leading-relaxed ${
+            isMobile ? 'text-lg mb-6 px-2' : 'text-xl sm:text-2xl mb-8'
+          }`}>
             Join 150 operators upgrading how humanity connects
           </p>
           
           <div className="space-y-4">
-            <button type="button" className="button-glow bg-synergy-gold text-os-dark px-12 py-6 text-xl font-bold hover:bg-synergy-light transition-all">
+            <button 
+              type="button" 
+              className={`button-glow bg-synergy-gold text-os-dark font-bold hover:bg-synergy-light transition-all touch-manipulation ${
+                isMobile 
+                  ? 'px-8 py-4 text-lg w-full max-w-sm mx-auto block' 
+                  : 'px-12 py-6 text-xl'
+              }`}
+              style={{ minHeight: isMobile ? '56px' : 'auto' }}
+            >
               SECURE YOUR LICENSE → $777
             </button>
             
