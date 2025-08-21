@@ -258,7 +258,11 @@ const StickyCTA = ({ spotsRemaining }: { spotsRemaining: number }) => {
         <div className="text-sm font-bold">
           {spotsRemaining} LICENSES LEFT
         </div>
-        <button type="button" className="text-xs underline hover:no-underline">
+        <button 
+          type="button" 
+          className="text-xs underline hover:no-underline"
+          onClick={() => window.open('https://buy.stripe.com/bJebJ0dgNcroeswgBvasg00', '_blank')}
+        >
           ACCEPT INVITATION →
         </button>
       </div>
@@ -1153,6 +1157,7 @@ export default function Home() {
                     }`}
                     style={{ minHeight: isMobile ? '48px' : 'auto' }}
                     disabled={!plan.highlight}
+                    onClick={plan.highlight ? () => window.open('https://buy.stripe.com/bJebJ0dgNcroeswgBvasg00', '_blank') : undefined}
                   >
                     {plan.cta}
                   </button>
@@ -1201,6 +1206,7 @@ export default function Home() {
                   : 'px-12 py-6 text-xl'
               }`}
               style={{ minHeight: isMobile ? '56px' : 'auto' }}
+              onClick={() => window.open('https://buy.stripe.com/bJebJ0dgNcroeswgBvasg00', '_blank')}
             >
               ACCEPT INVITATION → $777
             </button>
