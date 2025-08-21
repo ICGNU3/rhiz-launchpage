@@ -291,12 +291,10 @@ const StickyCTA = ({ spotsRemaining }: { spotsRemaining: number }) => {
   )
 }
 
-// Progress Indicator
 
 
 export default function Home() {
   const [spotsRemaining] = useState(117)
-  const [synergyScore] = useState(0)
   const [depthScore, setDepthScore] = useState(0)
   
   // Add refs for DOM elements
@@ -368,7 +366,7 @@ export default function Home() {
   // Memoized pricing plans
   const pricingPlans = useMemo(() => [
     {
-      title: "RELATIONAL OS",
+      title: "RHIZ",
       subtitle: "ROOT LICENSE",
       price: "$777",
       period: "LIFETIME",
@@ -527,7 +525,7 @@ export default function Home() {
             
             <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold leading-tight mb-6">
               <TypewriterText 
-                text="RELATIONAL OS" 
+                text="RHIZ" 
                 className="screen-light bg-gradient-to-r from-synergy-gold via-depth-cyan to-synergy-gold bg-clip-text text-transparent bg-300% animate-gradient" 
                 speed={80}
               />
