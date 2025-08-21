@@ -226,7 +226,7 @@ const ValueProposition = () => {
 
 
 // Sticky CTA Component
-const StickyCTA = ({ spotsRemaining }: { spotsRemaining: number }) => {
+const StickyCTA = () => {
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
@@ -256,12 +256,13 @@ const StickyCTA = ({ spotsRemaining }: { spotsRemaining: number }) => {
     <div className={`sticky-cta ${isVisible ? 'visible' : ''}`}>
       <div className="bg-synergy-gold text-os-dark px-6 py-3 rounded-lg shadow-lg">
         <div className="text-sm font-bold">
-          {spotsRemaining} LICENSES LEFT
+          EXCLUSIVE ACCESS
         </div>
         <button 
           type="button" 
-          className="text-xs underline hover:no-underline"
+          className="text-sm md:text-xs underline hover:no-underline touch-manipulation"
           onClick={() => window.open('https://buy.stripe.com/bJebJ0dgNcroeswgBvasg00', '_blank')}
+          style={{ minHeight: '44px', minWidth: '120px' }}
         >
           ACCEPT INVITATION →
         </button>
@@ -273,7 +274,6 @@ const StickyCTA = ({ spotsRemaining }: { spotsRemaining: number }) => {
 
 
 export default function Home() {
-  const [spotsRemaining] = useState(117)
   const [depthScore, setDepthScore] = useState(0)
   const isMobile = useIsMobile()
   
@@ -299,19 +299,19 @@ export default function Home() {
   // Memoized feature data
   const features = useMemo(() => [
     {
-      title: "DEPTH_SCANNER.exe",
-      description: "Analyzes relationship depth beyond surface interactions",
-      metrics: "Depth increased 3.2x average"
+      title: "LIFETIME ACCESS",
+      description: "Never pay again. Future users pay $99/month ($1,188/year). Your 10-year savings: $11,880",
+      metrics: "Value: $30,000+"
     },
     {
-      title: "SYNERGY_FINDER.exe",
-      description: "Discovers hidden connection opportunities in your network",
-      metrics: "$2.4M opportunity value detected"
+      title: "10 GOLDEN INVITES",
+      description: "Each invite = 1 year Pro membership worth $1,188. Total gift value: $11,880",
+      metrics: "Network multiplier effect"
     },
     {
-      title: "MEMORY_ENHANCE.exe",
-      description: "Perfect recall of every interaction and context",
-      metrics: "0% relationship data loss"
+      title: "FOUNDING MEMBER STATUS",
+      description: "Direct founder access, vote on features, early access, your name in credits",
+      metrics: "Priceless influence"
     }
   ], [])
   
@@ -445,7 +445,7 @@ export default function Home() {
 
       
       {/* Sticky CTA */}
-      <StickyCTA spotsRemaining={spotsRemaining} />
+              <StickyCTA />
 
       {/* OS Status Bar - Mobile Optimized */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-os-darker/95 backdrop-blur-md border-b border-os-border">
@@ -469,7 +469,7 @@ export default function Home() {
               </>
             )}
             <div className="text-xs font-mono text-alert-magenta animate-pulse">
-              {spotsRemaining}/150
+              ACCESS GRANTED
             </div>
           </div>
         </div>
@@ -880,9 +880,9 @@ export default function Home() {
               </motion.div>
             )}
 
-            {/* Urgency Counter - Mobile Simplified */}
+            {/* Accept Invitation Button - Mobile Optimized */}
             <motion.div 
-              className={`bg-gradient-to-br from-alert-magenta/30 via-os-darker/95 to-os-dark backdrop-blur-md border-2 border-alert-magenta/70 rounded-lg shadow-[0_0_20px_rgba(255,0,128,0.3)] ${
+              className={`bg-gradient-to-br from-synergy-gold/20 via-os-darker/95 to-synergy-gold/20 backdrop-blur-md border-2 border-synergy-gold/70 rounded-lg shadow-[0_0_20px_rgba(255,215,0,0.3)] ${
                 isMobile ? 'p-3' : 'p-4'
               }`}
               initial={{ opacity: 0, y: 50 }}
@@ -891,25 +891,29 @@ export default function Home() {
             >
               <div className="text-center space-y-3">
                 <div className="flex items-center justify-center gap-2">
-                  <div className="w-2 h-2 bg-alert-magenta rounded-full animate-pulse"></div>
-                  <span className="font-mono text-alert-magenta font-bold text-xs">CRITICAL</span>
+                  <div className="w-2 h-2 bg-synergy-gold rounded-full animate-pulse"></div>
+                  <span className="font-mono text-synergy-gold font-bold text-xs">INVITATION</span>
                 </div>
                 
-                <div className={`font-bold text-alert-magenta font-mono ${
-                  isMobile ? 'text-xl' : 'text-2xl'
-                }`}>
-                  {spotsRemaining}
-                </div>
+                <button 
+                  onClick={() => window.open('https://buy.stripe.com/bJebJ0dgNcroeswgBvasg00', '_blank')}
+                  className={`button-glow bg-gradient-to-r from-synergy-gold to-synergy-light text-os-dark font-bold rounded-lg hover:from-synergy-light hover:to-synergy-gold transition-all duration-300 transform hover:scale-105 focus:ring-4 focus:ring-synergy-light/50 focus:ring-offset-2 focus:ring-offset-os-dark shadow-2xl touch-manipulation ${
+                    isMobile ? 'px-6 py-4 text-base w-full' : 'px-8 py-4 text-base'
+                  }`}
+                  style={{ minHeight: '56px' }}
+                >
+                  ACCEPT INVITATION
+                </button>
                 
                 <div className="text-xs text-interface-light">
-                  spots left
+                  Limited time access
                 </div>
                 
                 <div className="w-full bg-os-dark rounded-full h-2">
                   <motion.div 
-                    className="bg-gradient-to-r from-alert-magenta to-synergy-gold h-2 rounded-full"
+                    className="bg-gradient-to-r from-synergy-gold to-depth-cyan h-2 rounded-full"
                     initial={{ width: "0%" }}
-                    animate={{ width: `${((150 - spotsRemaining) / 150) * 100}%` }}
+                    animate={{ width: "75%" }}
                     transition={{ duration: 2, ease: "easeOut" }}
                   />
                 </div>
@@ -961,7 +965,7 @@ export default function Home() {
             <p className={`text-interface-light max-w-3xl mx-auto ${
               isMobile ? 'text-base px-2' : 'text-lg'
             }`}>
-              Transform how you understand and nurture relationships
+              The $777 investment that delivers $200,000+ in lifetime value
             </p>
           </div>
 
@@ -985,6 +989,218 @@ export default function Home() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Value Proposition Section */}
+      <section className={`py-8 px-4 sm:px-6 lg:px-8 bg-os-dark/50 ${
+        isMobile ? 'pt-4' : ''
+      }`}>
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className={`font-bold mb-3 ${
+              isMobile ? 'text-2xl' : 'text-3xl sm:text-4xl'
+            }`}>
+              <span className="screen-light">THE ROOT ALPHA VALUE STACK</span>
+            </h2>
+            <p className={`text-interface-light max-w-3xl mx-auto ${
+              isMobile ? 'text-base px-2' : 'text-lg'
+            }`}>
+              Why $777 today is worth $200,000+ tomorrow
+            </p>
+          </div>
+
+          <div className={`grid gap-6 ${
+            isMobile ? 'grid-cols-1 space-y-4' : 'grid md:grid-cols-2 lg:grid-cols-3'
+          }`}>
+            {/* Lifetime Access */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="os-window p-6"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 bg-synergy-gold rounded-full flex items-center justify-center">
+                  <span className="text-os-dark font-bold text-sm">💎</span>
+                </div>
+                <h3 className="font-mono text-synergy-gold text-lg">LIFETIME ACCESS</h3>
+              </div>
+              <div className="space-y-3">
+                <div className="text-os-light">
+                  <span className="text-connection-green font-semibold">You pay:</span> $777 once
+                </div>
+                <div className="text-os-light">
+                  <span className="text-alert-magenta font-semibold">Future users pay:</span> $99/month ($1,188/year)
+                </div>
+                <div className="text-os-light">
+                  <span className="text-synergy-gold font-semibold">Your 10-year savings:</span> $11,880
+                </div>
+                <div className="text-os-light">
+                  <span className="text-depth-cyan font-semibold">Lifetime value:</span> $30,000+
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Golden Invites */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="os-window p-6"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 bg-synergy-gold rounded-full flex items-center justify-center">
+                  <span className="text-os-dark font-bold text-sm">🎟️</span>
+                </div>
+                <h3 className="font-mono text-synergy-gold text-lg">10 GOLDEN INVITES</h3>
+              </div>
+              <div className="space-y-3">
+                <div className="text-os-light">
+                  Each invite = <span className="text-connection-green font-semibold">1 year Pro membership</span>
+                </div>
+                <div className="text-os-light">
+                  Each invite worth = <span className="text-synergy-gold font-semibold">$1,188</span>
+                </div>
+                <div className="text-os-light">
+                  Total gift value = <span className="text-depth-cyan font-semibold">$11,880</span>
+                </div>
+                <div className="text-xs text-interface-light">
+                  Build your inner circle with shared intelligence
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Network Effect */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="os-window p-6"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 bg-synergy-gold rounded-full flex items-center justify-center">
+                  <span className="text-os-dark font-bold text-sm">🌐</span>
+                </div>
+                <h3 className="font-mono text-synergy-gold text-lg">NETWORK EFFECT</h3>
+              </div>
+              <div className="space-y-3">
+                <div className="text-os-light">
+                  <span className="text-connection-green font-semibold">150 hand-selected</span> professionals
+                </div>
+                <div className="text-os-light">
+                  <span className="text-synergy-gold font-semibold">825,000</span> total network reach
+                </div>
+                <div className="text-os-light">
+                  <span className="text-depth-cyan font-semibold">$100,000+</span> average member value
+                </div>
+                <div className="text-xs text-interface-light">
+                  Exclusive member directory & quarterly meetups
+                </div>
+              </div>
+            </motion.div>
+
+            {/* First-Mover Advantage */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="os-window p-6"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 bg-synergy-gold rounded-full flex items-center justify-center">
+                  <span className="text-os-dark font-bold text-sm">🚀</span>
+                </div>
+                <h3 className="font-mono text-synergy-gold text-lg">FIRST-MOVER ADVANTAGE</h3>
+              </div>
+              <div className="space-y-3">
+                <div className="text-os-light">
+                  <span className="text-connection-green font-semibold">12-18 month</span> head start
+                </div>
+                <div className="text-os-light">
+                  <span className="text-synergy-gold font-semibold">Train AI</span> on your specific needs
+                </div>
+                <div className="text-os-light">
+                  <span className="text-depth-cyan font-semibold">Build data moat</span> while others wait
+                </div>
+                <div className="text-xs text-interface-light">
+                  Lock in competitive advantage
+                </div>
+              </div>
+            </motion.div>
+
+            {/* ROI Benefits */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="os-window p-6"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 bg-synergy-gold rounded-full flex items-center justify-center">
+                  <span className="text-os-dark font-bold text-sm">💰</span>
+                </div>
+                <h3 className="font-mono text-synergy-gold text-lg">INVESTMENT-GRADE ROI</h3>
+              </div>
+              <div className="space-y-3">
+                <div className="text-os-light">
+                  <span className="text-connection-green font-semibold">One introduction:</span> $10,000+ value
+                </div>
+                <div className="text-os-light">
+                  <span className="text-synergy-gold font-semibold">One key hire:</span> $50,000 saved
+                </div>
+                <div className="text-os-light">
+                  <span className="text-depth-cyan font-semibold">One client saved:</span> $100,000 retained
+                </div>
+                <div className="text-xs text-interface-light">
+                  Members report 100x ROI within first year
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Exclusive Benefits */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="os-window p-6"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 bg-synergy-gold rounded-full flex items-center justify-center">
+                  <span className="text-os-dark font-bold text-sm">🏆</span>
+                </div>
+                <h3 className="font-mono text-synergy-gold text-lg">EXCLUSIVE BENEFITS</h3>
+              </div>
+              <div className="space-y-3">
+                <div className="text-os-light">
+                  <span className="text-connection-green font-semibold">Monthly video calls</span> with founders
+                </div>
+                <div className="text-os-light">
+                  <span className="text-synergy-gold font-semibold">Direct Telegram</span> access to CEO
+                </div>
+                <div className="text-os-light">
+                  <span className="text-depth-cyan font-semibold">Vote on features</span> & shape roadmap
+                </div>
+                <div className="text-xs text-interface-light">
+                  Your name in product credits
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Total Value Summary */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            className="mt-8 text-center"
+          >
+            <div className="inline-block bg-gradient-to-r from-synergy-gold/20 to-depth-cyan/20 border border-synergy-gold/50 rounded-lg p-6">
+              <div className="text-2xl font-bold text-synergy-gold mb-2">TOTAL LIFETIME VALUE: $200,000+</div>
+              <div className="text-lg text-os-light mb-4">Your Investment: $777</div>
+              <div className="text-xl font-bold text-connection-green">Return Multiple: 257x</div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
@@ -1143,9 +1359,9 @@ export default function Home() {
                         ? 'bg-synergy-gold text-os-dark hover:bg-synergy-light' 
                         : 'bg-interface-dark text-interface-gray cursor-not-allowed'
                     } ${
-                      isMobile ? 'py-4 px-3 text-sm' : 'py-3 px-4'
+                      isMobile ? 'py-4 px-3 text-base' : 'py-3 px-4'
                     }`}
-                    style={{ minHeight: isMobile ? '48px' : 'auto' }}
+                    style={{ minHeight: '48px' }}
                     disabled={!plan.highlight}
                     onClick={plan.highlight ? () => window.open('https://buy.stripe.com/bJebJ0dgNcroeswgBvasg00', '_blank') : undefined}
                   >
@@ -1169,7 +1385,7 @@ export default function Home() {
             <span className={`font-mono text-alert-magenta font-semibold ${
               isMobile ? 'text-sm' : ''
             }`}>
-              PERSONAL INVITATION: {spotsRemaining} SPOTS LEFT
+              PERSONAL INVITATION: EXCLUSIVE ACCESS
             </span>
           </div>
           
@@ -1181,13 +1397,24 @@ export default function Home() {
             </span>
           </h2>
           
-          <p className={`text-os-light max-w-2xl mx-auto leading-relaxed ${
+          <p className={`text-os-light max-w-3xl mx-auto leading-relaxed ${
             isMobile ? 'text-lg mb-6 px-2' : 'text-xl sm:text-2xl mb-8'
           }`}>
-            You've been handpicked to join an elite group of 150 relationship pioneers
+            You've been handpicked to join an elite group of 150 relationship pioneers. 
+            <span className="text-synergy-gold font-semibold"> The question isn't whether Root Alpha is worth $777. The question is: Can you afford to compete without it?</span>
           </p>
           
-          <div className="space-y-4">
+          <div className="space-y-6">
+            {/* Urgency Message */}
+            <div className="bg-gradient-to-r from-alert-magenta/20 to-synergy-gold/20 border border-alert-magenta/50 rounded-lg p-4">
+              <div className="text-center">
+                <div className="text-alert-magenta font-bold mb-2">🔥 AFTER 150 MEMBERS, RHIZ CLOSES UNTIL 2026</div>
+                <div className="text-os-light text-sm">
+                  No new members until public launch. Your network compounds uncontested while others wait.
+                </div>
+              </div>
+            </div>
+
             <button 
               type="button" 
               className={`button-glow bg-synergy-gold text-os-dark font-bold hover:bg-synergy-light transition-all touch-manipulation ${
@@ -1224,7 +1451,7 @@ export default function Home() {
             <div>
               <div className="font-mono text-synergy-gold mb-3">NETWORK_STATUS</div>
               <div className="space-y-1 text-interface-light">
-                <div>Operators: {150 - spotsRemaining}/150</div>
+                <div>Operators: Active</div>
                 <div>Synergies: Active</div>
                 <div>Depth: Optimizing</div>
               </div>

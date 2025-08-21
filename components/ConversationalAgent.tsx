@@ -915,9 +915,10 @@ export const ConversationalAgent = () => {
                 <motion.button
                   key={index}
                   onClick={() => handleSuggestionClick(suggestion)}
-                  className="text-left p-2 bg-os-darker/50 hover:bg-depth-cyan/20 border border-depth-cyan/30 rounded text-xs transition-all"
+                  className="text-left p-3 md:p-2 bg-os-darker/50 hover:bg-depth-cyan/20 border border-depth-cyan/30 rounded text-sm md:text-xs transition-all touch-manipulation"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
+                  style={{ minHeight: '44px' }}
                 >
                   {suggestion}
                 </motion.button>
@@ -1045,11 +1046,12 @@ export const ConversationalAgent = () => {
           disabled={aiState === 'processing' || aiState === 'speaking' || !isConnected}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className={`w-12 h-12 rounded-full flex items-center justify-center transition-all relative overflow-hidden ${
+          className={`w-14 h-14 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all relative overflow-hidden touch-manipulation ${
             aiState === 'listening'
               ? 'bg-gradient-to-r from-alert-magenta to-alert-purple shadow-lg'
               : 'bg-gradient-to-r from-connection-green to-connection-light hover:shadow-lg'
           } ${(aiState === 'processing' || aiState === 'speaking' || !isConnected) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+          style={{ minHeight: '56px', minWidth: '56px' }}
         >
           <AnimatePresence mode="wait">
             {aiState === 'listening' ? (
@@ -1092,7 +1094,8 @@ export const ConversationalAgent = () => {
             onChange={(e) => setCurrentInput(e.target.value)}
             placeholder={getInputPlaceholder()}
             disabled={aiState === 'processing' || aiState === 'speaking' || !isConnected}
-            className="w-full bg-gradient-to-r from-os-dark to-os-darker border border-depth-cyan/30 rounded-lg px-4 py-3 text-sm text-interface-light placeholder-interface-gray focus:outline-none focus:border-depth-cyan/60 focus:shadow-lg transition-all"
+            className="w-full bg-gradient-to-r from-os-dark to-os-darker border border-depth-cyan/30 rounded-lg px-4 py-4 md:py-3 text-base md:text-sm text-interface-light placeholder-interface-gray focus:outline-none focus:border-depth-cyan/60 focus:shadow-lg transition-all touch-manipulation"
+            style={{ minHeight: '48px' }}
           />
         </form>
 
