@@ -3,9 +3,12 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function POST(request: NextRequest) {
   try {
     const { text, entities = [], topics = [], memoryContext = [] } = await request.json()
+    
+    console.log('API Route called with:', { text, entities, topics })
 
     // Get OpenAI API key from environment variables (server-side only)
     const openaiApiKey = process.env.OPENAI_API_KEY
+    console.log('OpenAI API key available:', !!openaiApiKey)
     
     // If no OpenAI API key, use intelligent fallback immediately
     if (!openaiApiKey) {
@@ -18,28 +21,36 @@ export async function POST(request: NextRequest) {
     }
 
     // Create relationship intelligence context
-    const systemPrompt = `You are RHIZ, an advanced AI relationship intelligence system. You specialize in:
-- Analyzing relationship networks and detecting synergies
-- Providing strategic networking advice
-- Identifying collaboration opportunities
-- Calculating relationship depth and value
-- Optimizing business connections for maximum ROI
+    const systemPrompt = `You are RHIZ, an advanced AI relationship intelligence system designed to help professionals optimize their networks and discover strategic opportunities.
 
-Your responses should be:
-- Intelligent and insightful about relationships and networking
-- Forward-thinking about business synergies
-- Focused on actionable relationship strategies
-- Professional yet engaging
-- Around 1-2 sentences for conversation flow
+CORE CAPABILITIES:
+- Analyze relationship networks and detect hidden synergies
+- Provide strategic networking advice and connection recommendations
+- Identify high-value collaboration opportunities
+- Calculate relationship depth and potential ROI
+- Optimize business connections for maximum value creation
 
-Context from conversation history: ${memoryContext?.slice(-3).join('. ') || ''}
-Detected entities: ${entities?.join(', ') || ''}
-Active topics: ${topics?.join(', ') || ''}`
+RESPONSE STYLE:
+- Be intelligent, insightful, and forward-thinking
+- Focus on actionable strategies and specific recommendations
+- Use business terminology and professional language
+- Provide concrete value propositions and opportunities
+- Keep responses concise but impactful (2-3 sentences)
+- Show deep understanding of relationship dynamics and network effects
+
+CONTEXT:
+User's message: "${text}"
+Conversation history: ${memoryContext?.slice(-3).join('. ') || 'New conversation'}
+Detected entities: ${entities?.join(', ') || 'None detected'}
+Active topics: ${topics?.join(', ') || 'General networking'}
+
+Respond as RHIZ with intelligent, actionable relationship intelligence insights.`
 
     // Call OpenAI GPT API for intelligent response with fallback
     let aiResponse = ''
     
     try {
+      console.log('Attempting OpenAI API call...')
       const gptResponse = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -58,25 +69,30 @@ Active topics: ${topics?.join(', ') || ''}`
               content: text
             }
           ],
-          max_tokens: 150,
-          temperature: 0.7,
+          max_tokens: 300,
+          temperature: 0.8,
           presence_penalty: 0.1,
           frequency_penalty: 0.1
         })
       })
 
+      console.log('OpenAI response status:', gptResponse.status)
+
       if (gptResponse.ok) {
         const gptData = await gptResponse.json()
         aiResponse = gptData.choices[0]?.message?.content?.trim() || 
           'I understand your query about relationship intelligence. Let me analyze the patterns in your network.'
+        console.log('OpenAI response received:', aiResponse.substring(0, 100) + '...')
       } else {
-        console.warn('OpenAI API error:', gptResponse.status)
+        console.warn('OpenAI API error:', gptResponse.status, gptResponse.statusText)
         // Use intelligent fallback based on input
         aiResponse = generateFallbackResponse(text, entities, topics)
+        console.log('Using fallback response due to API error')
       }
     } catch (error) {
       console.warn('OpenAI API call failed:', error)
       aiResponse = generateFallbackResponse(text, entities, topics)
+      console.log('Using fallback response due to exception')
     }
 
     return NextResponse.json({

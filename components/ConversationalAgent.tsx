@@ -616,6 +616,8 @@ export const ConversationalAgent = () => {
     const elevenlabsApiKey = process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY
 
     try {
+      console.log('Sending message to API:', { text, entities, topics })
+      
       // Call our secure API route for OpenAI integration
       const chatResponse = await fetch('/api/chat', {
         method: 'POST',
@@ -630,14 +632,17 @@ export const ConversationalAgent = () => {
         })
       })
 
+      console.log('API response status:', chatResponse.status)
       let aiResponse = ''
       
       if (chatResponse.ok) {
         const chatData = await chatResponse.json()
         aiResponse = chatData.response || generateFallbackResponse(text, entities, topics)
+        console.log('API response received:', aiResponse.substring(0, 100) + '...')
       } else {
         console.warn('Chat API error:', chatResponse.status, chatResponse.statusText)
         aiResponse = generateFallbackResponse(text, entities, topics)
+        console.log('Using fallback due to API error')
       }
       
       // Extract metadata from AI response
