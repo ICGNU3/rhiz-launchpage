@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
 import TypewriterText from '../components/TypewriterText'
 import InteractiveTerminal, { InteractiveTerminalRef } from '../components/InteractiveTerminal'
-import ElevenLabsWidget from '../components/ElevenLabsWidget'
+import CustomVoiceInterface from '../components/CustomVoiceInterface'
 
 // Mobile detection hook
 const useIsMobile = () => {
@@ -842,7 +842,7 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="flex-1 flex items-center justify-center w-full">
-                    <ElevenLabsWidget />
+                    <CustomVoiceInterface />
                   </div>
                   <div className={`text-center text-interface-light ${
                     isMobile ? 'mt-2 text-xs px-2' : 'mt-3 text-xs'
