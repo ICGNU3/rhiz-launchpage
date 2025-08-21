@@ -57,6 +57,7 @@ export const ConversationalAgent = () => {
   const [messages, setMessages] = useState<Message[]>([])
   const [currentInput, setCurrentInput] = useState('')
   const [isConnected, setIsConnected] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   
   // Advanced AI States
   const [confidence, setConfidence] = useState(0)
@@ -96,6 +97,63 @@ export const ConversationalAgent = () => {
     { code: 'zh-CN', name: '中文', flag: '🇨🇳' },
     { code: 'ja-JP', name: '日本語', flag: '🇯🇵' }
   ]
+
+  // Skeleton Components
+  const MessageSkeleton = () => (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex items-start gap-3 mb-4"
+    >
+      <div className="w-8 h-8 bg-os-darker rounded-full animate-pulse"></div>
+      <div className="flex-1 space-y-2">
+        <div className="h-4 bg-os-darker rounded animate-pulse w-3/4"></div>
+        <div className="h-3 bg-os-darker rounded animate-pulse w-1/2"></div>
+      </div>
+    </motion.div>
+  )
+
+  const VoiceInterfaceSkeleton = () => (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="bg-os-darker/50 backdrop-blur-md border border-depth-cyan/30 rounded-lg p-4 space-y-4"
+    >
+      {/* Header Skeleton */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-os-darker rounded-full animate-pulse"></div>
+          <div className="space-y-2">
+            <div className="h-4 bg-os-darker rounded animate-pulse w-24"></div>
+            <div className="h-3 bg-os-darker rounded animate-pulse w-16"></div>
+          </div>
+        </div>
+        <div className="w-8 h-8 bg-os-darker rounded-full animate-pulse"></div>
+      </div>
+
+      {/* Messages Area Skeleton */}
+      <div className="space-y-3">
+        <MessageSkeleton />
+        <MessageSkeleton />
+        <MessageSkeleton />
+      </div>
+
+      {/* Input Area Skeleton */}
+      <div className="flex items-center gap-3">
+        <div className="w-14 h-14 bg-os-darker rounded-full animate-pulse"></div>
+        <div className="flex-1 h-12 bg-os-darker rounded-lg animate-pulse"></div>
+        <div className="w-8 h-8 bg-os-darker rounded-full animate-pulse"></div>
+      </div>
+
+      {/* Suggestions Skeleton */}
+      <div className="grid grid-cols-2 gap-2">
+        <div className="h-8 bg-os-darker rounded animate-pulse"></div>
+        <div className="h-8 bg-os-darker rounded animate-pulse"></div>
+        <div className="h-8 bg-os-darker rounded animate-pulse"></div>
+        <div className="h-8 bg-os-darker rounded animate-pulse"></div>
+      </div>
+    </motion.div>
+  )
 
   // Audio visualization update function
   const updateAudioVisualization = useCallback(() => {
@@ -223,12 +281,14 @@ export const ConversationalAgent = () => {
 
   const initializeConversation = async () => {
     try {
+      setIsLoading(true)
       const apiKey = process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY
       console.log('API Key available:', !!apiKey)
       console.log('Voice ID:', process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_ID)
       
       if (!apiKey) {
         console.warn('ElevenLabs API key not found')
+        setIsLoading(false)
         return
       }
 
@@ -250,10 +310,12 @@ export const ConversationalAgent = () => {
       // For now, let's use a simpler approach - just set up the connection
       // We'll implement the full conversational AI in the next step
       setIsConnected(true)
+      setIsLoading(false)
       console.log('Conversational agent initialized successfully')
       
     } catch (error) {
       console.error('Failed to initialize conversation:', error)
+      setIsLoading(false)
     }
   }
 
@@ -632,6 +694,11 @@ export const ConversationalAgent = () => {
     }
   }
 
+  // Show skeleton while loading
+  if (isLoading) {
+    return <VoiceInterfaceSkeleton />
+  }
+
   return (
     <div className="w-full h-full flex flex-col relative overflow-hidden">
       {/* Hidden audio element for playback */}
@@ -852,6 +919,29 @@ export const ConversationalAgent = () => {
                     animate={{ width: ['0%', '100%', '0%'] }}
                     transition={{ duration: 2, repeat: Infinity }}
                   />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Processing Skeleton for AI Response */}
+      <AnimatePresence>
+        {aiState === 'processing' && (
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="flex justify-start mb-3"
+          >
+            <div className="max-w-[85%] rounded-lg px-3 py-2 bg-gradient-to-r from-os-dark to-os-darker border border-depth-cyan/30">
+              <div className="flex items-start gap-2">
+                <div className="w-6 h-6 bg-os-darker rounded-full animate-pulse"></div>
+                <div className="flex-1 space-y-2">
+                  <div className="h-3 bg-os-darker rounded animate-pulse w-3/4"></div>
+                  <div className="h-3 bg-os-darker rounded animate-pulse w-1/2"></div>
+                  <div className="h-3 bg-os-darker rounded animate-pulse w-2/3"></div>
                 </div>
               </div>
             </div>
