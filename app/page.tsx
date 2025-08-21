@@ -543,19 +543,7 @@ export default function Home() {
                 </div>
               </motion.div>
               
-              {/* Top Center Alert */}
-              <motion.div 
-                className="bg-alert-magenta/20 backdrop-blur-md border border-alert-magenta/50 rounded-lg px-6 py-3 shadow-2xl"
-                animate={{ scale: [1, 1.02, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-alert-magenta rounded-full animate-pulse"></div>
-                  <span className="font-mono text-alert-magenta font-bold text-sm">
-                    CRITICAL: {spotsRemaining}/150 LICENSES
-                  </span>
-                </div>
-              </motion.div>
+
               
               {/* Top Right Metrics */}
               <motion.div 
