@@ -624,6 +624,7 @@ export const ConversationalAgent = () => {
       if (elevenlabsApiKey) {
         try {
           const voiceId = process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_ID || '21m00Tcm4TlvDq8ikWAM'
+          console.log('Attempting ElevenLabs TTS call...')
           
           const ttsResponse = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
             method: 'POST',
@@ -666,6 +667,7 @@ export const ConversationalAgent = () => {
       }
     } catch (error) {
       console.error('AI processing error:', error)
+      console.error('Error details:', error instanceof Error ? error.message : error)
       
       // Fallback response
       const fallbackResponse = "I'm experiencing a temporary connection issue with my neural networks. My relationship intelligence systems are recalibrating. Please try again in a moment."
