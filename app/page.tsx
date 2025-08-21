@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
 import TypewriterText from '../components/TypewriterText'
 import InteractiveTerminal, { InteractiveTerminalRef } from '../components/InteractiveTerminal'
-import CustomVoiceInterface from '../components/CustomVoiceInterface'
+import ConversationalAgent from '../components/ConversationalAgent'
 
 // Mobile detection hook
 const useIsMobile = () => {
@@ -259,7 +259,7 @@ const StickyCTA = ({ spotsRemaining }: { spotsRemaining: number }) => {
           {spotsRemaining} LICENSES LEFT
         </div>
         <button type="button" className="text-xs underline hover:no-underline">
-          SECURE YOUR SPOT →
+          ACCEPT INVITATION →
         </button>
       </div>
     </div>
@@ -353,7 +353,7 @@ export default function Home() {
         "Direct developer access",
         "Founding operator status"
       ],
-      cta: "SECURE YOUR LICENSE",
+      cta: "ACCEPT INVITATION",
       highlight: true
     },
     {
@@ -652,13 +652,14 @@ export default function Home() {
                 isMobile ? 'p-4' : 'p-6'
               }`}>
                 <TypewriterText 
-                  text="The operating system for human relationships."
+                  text="You've been personally selected for early access."
                   delay={1500}
                   speed={40}
+                  className="text-depth-cyan"
                 />
                 <br/>
                 <TypewriterText 
-                  text="Deepen connections. Discover synergies. Transform your network."
+                  text="Join the first 150 relationship intelligence pioneers."
                   className="text-synergy-gold font-semibold"
                   delay={3500}
                   speed={35}
@@ -697,7 +698,7 @@ export default function Home() {
                 <div className={`flex items-center justify-center ${
                   isMobile ? 'gap-2 flex-col' : 'gap-4'
                 }`}>
-                  <span className={isMobile ? 'text-lg' : ''}>SECURE YOUR SPOT</span>
+                  <span className={isMobile ? 'text-lg' : ''}>ACCEPT INVITATION</span>
                   <div className={`bg-os-dark/20 rounded-lg ${
                     isMobile ? 'px-3 py-1 text-lg' : 'px-4 py-2'
                   }`}>
@@ -714,8 +715,8 @@ export default function Home() {
                 transition={{ duration: 2, repeat: Infinity }}
               >
                 {isMobile 
-                  ? 'LIFETIME LICENSE • ROOT ACCESS'
-                  : 'LIFETIME LICENSE • ROOT ACCESS • 10 USER INVITES'
+                  ? 'PERSONALLY SELECTED • LIFETIME ACCESS'
+                  : 'PERSONALLY SELECTED • LIFETIME ACCESS • FOUNDING MEMBER'
                 }
               </motion.div>
               
@@ -842,7 +843,7 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="flex-1 flex items-center justify-center w-full">
-                    <CustomVoiceInterface />
+                    <ConversationalAgent />
                   </div>
                   <div className={`text-center text-interface-light ${
                     isMobile ? 'mt-2 text-xs px-2' : 'mt-3 text-xs'
@@ -1172,7 +1173,7 @@ export default function Home() {
             <span className={`font-mono text-alert-magenta font-semibold ${
               isMobile ? 'text-sm' : ''
             }`}>
-              CRITICAL: {spotsRemaining} LICENSES REMAINING
+              PERSONAL INVITATION: {spotsRemaining} SPOTS LEFT
             </span>
           </div>
           
@@ -1180,14 +1181,14 @@ export default function Home() {
             isMobile ? 'text-2xl mb-6' : 'text-4xl sm:text-5xl mb-8'
           }`}>
             <span className="screen-light">
-              {isMobile ? 'INITIALIZE RELATIONAL OS' : 'INITIALIZE YOUR RELATIONAL OS'}
+              {isMobile ? 'YOUR EXCLUSIVE INVITATION' : 'YOUR EXCLUSIVE INVITATION AWAITS'}
             </span>
           </h2>
           
           <p className={`text-os-light max-w-2xl mx-auto leading-relaxed ${
             isMobile ? 'text-lg mb-6 px-2' : 'text-xl sm:text-2xl mb-8'
           }`}>
-            Join 150 operators upgrading how humanity connects
+            You've been handpicked to join an elite group of 150 relationship pioneers
           </p>
           
           <div className="space-y-4">
@@ -1200,7 +1201,7 @@ export default function Home() {
               }`}
               style={{ minHeight: isMobile ? '56px' : 'auto' }}
             >
-              SECURE YOUR LICENSE → $777
+              ACCEPT INVITATION → $777
             </button>
             
             <div className="text-interface-light">

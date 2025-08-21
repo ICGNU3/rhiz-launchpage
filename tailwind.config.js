@@ -7,6 +7,12 @@ module.exports = {
   ],
   theme: {
     extend: {
+      screens: {
+        'xs': '475px',
+        'mobile': {'max': '767px'},
+        'tablet': {'min': '768px', 'max': '1023px'},
+        'desktop': {'min': '1024px'},
+      },
       colors: {
         os: {
           dark: '#0A0F14',
@@ -51,6 +57,8 @@ module.exports = {
         'stamp-appear': 'stampAppear 0.5s ease-out',
         'folder-lift': 'folderLift 0.3s ease-out',
         'paper-shuffle': 'paperShuffle 0.4s ease-in-out',
+        'mobile-pulse': 'mobilePulse 2s ease-in-out infinite',
+        'touch-feedback': 'touchFeedback 0.1s ease-out',
       },
       keyframes: {
         typewriter: {
@@ -85,11 +93,32 @@ module.exports = {
           '75%': { transform: 'translateX(5px) rotate(1deg)' },
           '100%': { transform: 'translateX(0px) rotate(0deg)' },
         },
+        mobilePulse: {
+          '0%, 100%': { opacity: '0.8', transform: 'scale(1)' },
+          '50%': { opacity: '1', transform: 'scale(1.02)' },
+        },
+        touchFeedback: {
+          '0%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(0.98)' },
+          '100%': { transform: 'scale(1)' },
+        },
       },
       spacing: {
         '18': '4.5rem',
         '88': '22rem',
         '128': '32rem',
+        'safe-top': 'env(safe-area-inset-top)',
+        'safe-bottom': 'env(safe-area-inset-bottom)',
+        'safe-left': 'env(safe-area-inset-left)',
+        'safe-right': 'env(safe-area-inset-right)',
+      },
+      minHeight: {
+        'screen-mobile': ['100vh', '100dvh'],
+        'screen-safe': 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
+      },
+      height: {
+        'screen-mobile': ['100vh', '100dvh'],
+        'screen-safe': 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
       },
     },
   },
