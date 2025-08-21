@@ -211,17 +211,38 @@ export const ConversationalAgent = () => {
           setIsConnected(true)
           setShowSuggestions(false)
           
-          // Start audio visualization
+          // Start audio visualization with mobile compatibility
           navigator.mediaDevices.getUserMedia({ audio: true })
             .then(stream => {
-              audioContextRef.current = new AudioContext()
+              if (!audioContextRef.current) {
+                // Handle Safari's requirement for user gesture
+                audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
+              }
+              
+              // Resume audio context for mobile Safari
+              if (audioContextRef.current.state === 'suspended') {
+                audioContextRef.current.resume()
+              }
+              
               const source = audioContextRef.current.createMediaStreamSource(stream)
               analyserRef.current = audioContextRef.current.createAnalyser()
               analyserRef.current.fftSize = 256
               source.connect(analyserRef.current)
               updateAudioVisualization()
             })
-            .catch(console.error)
+            .catch(error => {
+              console.error('Microphone access error:', error)
+              // Provide user feedback for mobile permission issues
+              if (error.name === 'NotAllowedError') {
+                setMessages(prev => [...prev, {
+                  id: Date.now().toString(),
+                  text: "Microphone permission denied. Please enable microphone access in your browser settings to use voice features.",
+                  isUser: false,
+                  timestamp: new Date(),
+                  confidence: 100
+                }])
+              }
+            })
         }
 
         recognitionRef.current.onresult = (event: any) => {
@@ -392,17 +413,40 @@ export const ConversationalAgent = () => {
       setRelationshipDepth(prev => Math.min(100, prev + Math.random() * 5))
       setLearningProgress(prev => Math.min(100, prev + Math.random() * 3))
 
-      // Play audio if available
-      if (response.audioUrl && audioRef.current) {
+      // Play audio if available with mobile compatibility
+      if (response.audioUrl && audioRef.current) {        
+        // Handle mobile audio playback with user gesture requirement
+        const playAudio = async () => {
+          try {
+            audioRef.current!.onplay = () => {
+              updateAudioVisualization()
+            }
+            audioRef.current!.onended = () => {
+              setAIState('idle')
+              generateContextualSuggestions(response.text)
+            }
+            
+            await audioRef.current!.play()
+          } catch (error) {
+            console.warn('Audio playback failed (likely mobile restrictions):', error)
+            // On mobile, audio often requires user gesture - show message
+            if (isMobile) {
+              setMessages(prev => [...prev, {
+                id: (Date.now() + 2).toString(),
+                text: "[Tap to play audio response]",
+                isUser: false,
+                timestamp: new Date(),
+                confidence: 100,
+                audioUrl: response.audioUrl
+              }])
+            }
+            setAIState('idle')
+            generateContextualSuggestions(response.text)
+          }
+        }
+        
         audioRef.current.src = response.audioUrl
-        audioRef.current.onplay = () => {
-          updateAudioVisualization()
-        }
-        audioRef.current.onended = () => {
-          setAIState('idle')
-          generateContextualSuggestions(response.text)
-        }
-        audioRef.current.play()
+        playAudio()
       } else {
         setAIState('idle')
         generateContextualSuggestions(response.text)
@@ -537,149 +581,131 @@ export const ConversationalAgent = () => {
     setShowSuggestions(true)
   }
 
+  // REAL AI INTEGRATION - Using secure API route
   const sendMessageToAgent = async (
     text: string, 
     confidence: number = 100, 
     entities: string[] = [], 
     topics: string[] = []
   ): Promise<AgentResponse> => {
-    const apiKey = process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY
-    if (!apiKey) {
-      throw new Error('API key not available')
-    }
+    const elevenlabsApiKey = process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY
 
-    // Enhanced AI response generation with context
-    const aiResponse = generateAIResponse(text, entities, topics, memoryContext)
-    const responseEntities = extractEntities(aiResponse)
-    const responseTopics = extractTopics(aiResponse)
-    const responseSynergies = findSynergies(aiResponse)
-    const responseSentiment = analyzeSentiment(aiResponse)
-    
     try {
-      // Convert the response to speech using ElevenLabs TTS
-      const voiceId = process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_ID || '21m00Tcm4TlvDq8ikWAM'
-      
-      const ttsResponse = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+      // Call our secure API route for OpenAI integration
+      const chatResponse = await fetch('/api/chat', {
         method: 'POST',
         headers: {
-          'Accept': 'audio/mpeg',
           'Content-Type': 'application/json',
-          'xi-api-key': apiKey,
         },
         body: JSON.stringify({
-          text: aiResponse,
-          model_id: 'eleven_monolingual_v1',
-          voice_settings: {
-            stability: 0.6,
-            similarity_boost: 0.8,
-            style: 0.2,
-            use_speaker_boost: true
-          }
+          text,
+          entities,
+          topics,
+          memoryContext
         })
       })
 
-      if (ttsResponse.ok) {
-        const audioBlob = await ttsResponse.blob()
-        const audioUrl = URL.createObjectURL(audioBlob)
-        
-        return {
-          text: aiResponse,
-          audioUrl: audioUrl,
-          confidence: 85 + Math.random() * 15,
-          entities: responseEntities,
-          topics: responseTopics,
-          synergies: responseSynergies,
-          sentiment: responseSentiment
-        }
-      } else {
-        console.warn('TTS failed, returning text only')
-        return {
-          text: aiResponse,
-          audioUrl: undefined,
-          confidence: 90 + Math.random() * 10,
-          entities: responseEntities,
-          topics: responseTopics,
-          synergies: responseSynergies,
-          sentiment: responseSentiment
+      if (!chatResponse.ok) {
+        throw new Error(`Chat API error: ${chatResponse.status}`)
+      }
+
+      const chatData = await chatResponse.json()
+      const aiResponse = chatData.response
+      
+      // Extract metadata from AI response
+      const responseEntities = extractEntities(aiResponse)
+      const responseTopics = extractTopics(aiResponse)
+      const responseSynergies = findSynergies(aiResponse)
+      const responseSentiment = analyzeSentiment(aiResponse)
+      
+      // Convert to speech with ElevenLabs TTS (if API key available)
+      let audioUrl: string | undefined
+      
+      if (elevenlabsApiKey) {
+        try {
+          const voiceId = process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_ID || '21m00Tcm4TlvDq8ikWAM'
+          
+          const ttsResponse = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+            method: 'POST',
+            headers: {
+              'Accept': 'audio/mpeg',
+              'Content-Type': 'application/json',
+              'xi-api-key': elevenlabsApiKey,
+            },
+            body: JSON.stringify({
+              text: aiResponse,
+              model_id: 'eleven_monolingual_v1',
+              voice_settings: {
+                stability: 0.6,
+                similarity_boost: 0.8,
+                style: 0.2,
+                use_speaker_boost: true
+              }
+            })
+          })
+
+          if (ttsResponse.ok) {
+            const audioBlob = await ttsResponse.blob()
+            audioUrl = URL.createObjectURL(audioBlob)
+          } else {
+            console.warn('TTS failed:', ttsResponse.status, ttsResponse.statusText)
+          }
+        } catch (ttsError) {
+          console.warn('TTS error:', ttsError)
         }
       }
-    } catch (error) {
-      console.warn('TTS error, returning text only:', error)
+      
       return {
         text: aiResponse,
-        audioUrl: undefined,
-        confidence: 85 + Math.random() * 15,
+        audioUrl,
+        confidence: 90 + Math.random() * 10,
         entities: responseEntities,
         topics: responseTopics,
         synergies: responseSynergies,
         sentiment: responseSentiment
       }
-    }
-  }
-
-  const generateAIResponse = (userInput: string, entities: string[] = [], topics: string[] = [], context: string[] = []): string => {
-    const input = userInput.toLowerCase()
-    const hasContext = context.length > 0
-    const contextual = hasContext ? "Building on our previous conversation, " : ""
-    
-    // Advanced response logic with entity and topic awareness
-    if (input.includes('relationship') || input.includes('network')) {
-      if (entities.length > 0) {
-        return `${contextual}I've detected ${entities.length} key entities in your network: ${entities.slice(0, 3).join(', ')}. My relationship intelligence analysis shows potential for deepening these connections by 340%. I can map the synergy pathways between ${entities[0]} and your other connections. What specific relationship dynamics would you like me to analyze?`
+    } catch (error) {
+      console.error('AI processing error:', error)
+      
+      // Fallback response
+      const fallbackResponse = "I'm experiencing a temporary connection issue with my neural networks. My relationship intelligence systems are recalibrating. Please try again in a moment."
+      
+      return {
+        text: fallbackResponse,
+        audioUrl: undefined,
+        confidence: 95,
+        entities: [],
+        topics: ['technical'],
+        synergies: [],
+        sentiment: 'neutral'
       }
-      return `${contextual}I'm analyzing your relationship network topology. My neural pathways are detecting 94 active synergies with depth scores averaging 82%. I can help you navigate the relationship matrix to unlock hidden value. Which network layer should we explore first?`
     }
-    
-    if (input.includes('synergy') || input.includes('opportunity')) {
-      const synergyValue = Math.floor(Math.random() * 3000000) + 500000
-      return `${contextual}Synergy detection protocol activated. I've identified $${(synergyValue).toLocaleString()} in potential opportunity value across your network. The highest-probability synergies involve ${topics.length > 0 ? topics.join(' and ') : 'technological innovation and strategic partnerships'}. Shall I initiate deep synergy mapping?`
-    }
-    
-    if (input.includes('analyze') || input.includes('depth')) {
-      return `${contextual}Initiating relationship depth analysis. My neural networks are processing communication patterns, interaction frequency, and value exchange matrices. Current depth metrics show ${Math.floor(Math.random() * 40) + 60}% optimization potential. I'm detecting untapped collaboration opportunities that could increase relationship value by 240%. What specific depth parameters should I focus on?`
-    }
-    
-    if (input.includes('connect') || input.includes('introduction')) {
-      return `${contextual}Connection optimization protocol engaged. Based on your network topology, I've identified 7 high-value introduction opportunities with success probabilities above 85%. The optimal connection sequence involves leveraging your ${entities.length > 0 ? entities[0] : 'strongest'} relationship as an anchor point. Should I generate the introduction pathway map?`
-    }
-    
-    if (input.includes('help') || input.includes('what can you do')) {
-      return `${contextual}I'm RHIZ, your neural relationship intelligence system. My capabilities include: real-time synergy detection, relationship depth analysis, network optimization, opportunity value calculation, and strategic connection planning. I process voice biometrics, sentiment analysis, and contextual intelligence to maximize your relationship ROI. What aspect of relationship intelligence interests you most?`
-    }
-    
-    if (input.includes('hello') || input.includes('hi')) {
-      const greetings = [
-        "Neural pathways activated. I'm RHIZ, your relationship intelligence architect.",
-        "Connection established. I'm RHIZ, analyzing your relationship matrix in real-time.",
-        "System online. I'm RHIZ, your AI-powered synergy detection engine."
-      ]
-      return greetings[Math.floor(Math.random() * greetings.length)] + " How can I optimize your network today?"
-    }
-    
-    if (input.includes('show') || input.includes('visualize')) {
-      return `${contextual}Generating visual intelligence display. I can render your relationship network as an interactive 3D topology, highlight synergy pathways with probability heat maps, and show relationship depth gradients. The visualization will reveal hidden connection patterns and untapped value nodes. Which visualization mode would you prefer?`
-    }
-    
-    // Context-aware default responses
-    if (hasContext) {
-      return `Continuing our relationship intelligence analysis of "${userInput}". I'm processing this through my neural networks alongside our conversation history. I detect ${topics.length} relevant topics and ${entities.length} key entities. My algorithms suggest this connects to broader patterns in your network optimization. What specific insights are you seeking?`
-    }
-    
-    // Enhanced default response
-    const insights = [
-      "relationship depth optimization",
-      "synergy pathway mapping", 
-      "network value maximization",
-      "strategic connection planning",
-      "collaboration opportunity identification"
-    ]
-    
-    return `I'm processing "${userInput}" through my relationship intelligence algorithms. I can help you with ${insights[Math.floor(Math.random() * insights.length)]} and ${insights[Math.floor(Math.random() * insights.length)]}. My neural networks are detecting ${Math.floor(Math.random() * 20) + 10} potential connection points related to your query. How would you like to explore this further?`
   }
 
-  const startListening = () => {
+  const startListening = async () => {
     if (recognitionRef.current && aiState === 'idle') {
-      recognitionRef.current.start()
+      try {
+        // Initialize audio context with user gesture for mobile
+        if (!audioContextRef.current) {
+          audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
+        }
+        
+        // Resume audio context if suspended (common on mobile)
+        if (audioContextRef.current.state === 'suspended') {
+          await audioContextRef.current.resume()
+        }
+        
+        recognitionRef.current.start()
+      } catch (error) {
+        console.error('Error starting speech recognition:', error)
+        setMessages(prev => [...prev, {
+          id: Date.now().toString(),
+          text: "Voice recognition unavailable. Please type your message or check microphone permissions.",
+          isUser: false,
+          timestamp: new Date(),
+          confidence: 100
+        }])
+      }
     }
   }
 
@@ -706,6 +732,18 @@ export const ConversationalAgent = () => {
     e.preventDefault()
     if (currentInput.trim()) {
       handleUserMessage(currentInput.trim())
+    }
+  }
+  
+  // Handle audio playback for mobile messages
+  const handleAudioPlayback = async (audioUrl: string) => {
+    if (audioRef.current) {
+      try {
+        audioRef.current.src = audioUrl
+        await audioRef.current.play()
+      } catch (error) {
+        console.warn('Mobile audio playback failed:', error)
+      }
     }
   }
 
@@ -875,7 +913,20 @@ export const ConversationalAgent = () => {
                     : 'bg-gradient-to-r from-os-dark to-os-darker text-interface-light border border-depth-cyan/30'
                 } ${isMobile ? 'text-sm' : 'text-xs'}`}
               >
-                {message.text}
+                {/* Handle clickable audio messages for mobile */}
+                {message.audioUrl && message.text === '[Tap to play audio response]' ? (
+                  <button 
+                    type="button"
+                    onClick={() => handleAudioPlayback(message.audioUrl!)}
+                    className="flex items-center gap-2 w-full text-left hover:bg-depth-cyan/10 rounded p-1 transition-colors touch-manipulation"
+                    style={{ minHeight: '44px' }}
+                  >
+                    <div className="w-3 h-3 bg-connection-green rounded-full animate-pulse"></div>
+                    <span>Tap to play audio response</span>
+                  </button>
+                ) : (
+                  message.text
+                )}
                 
                 {/* Confidence and Metadata - Simplified on mobile */}
                 {message.confidence && !isMobile && (
