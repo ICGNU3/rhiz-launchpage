@@ -128,6 +128,9 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
   
 
 
+  // Enhanced extraction toggle
+  const [useEnhancedExtraction, setUseEnhancedExtraction] = useState(false)
+  
   // Extract profile data from LinkedIn URL
   const extractLinkedInProfile = useCallback(async () => {
     if (!userProfile.linkedinUrl) return
@@ -135,7 +138,10 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
     setIsExtracting(true)
     
     try {
-      const response = await fetch('/api/linkedin', {
+      // Use enhanced API if enabled, otherwise fall back to original
+      const apiEndpoint = useEnhancedExtraction ? '/api/linkedin-enhanced' : '/api/linkedin'
+      
+      const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -374,13 +380,27 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
               onChange={(e) => setUserProfile(prev => ({ ...prev, linkedinUrl: e.target.value }))}
             />
           </div>
-          <button
-            onClick={extractLinkedInProfile}
-            disabled={!userProfile.linkedinUrl || isExtracting}
-            className="w-full sm:w-auto bg-synergy-gold text-os-dark px-6 py-3 sm:py-2 rounded font-semibold hover:bg-synergy-light transition-colors disabled:opacity-50 text-base min-h-[44px]"
-          >
-            {isExtracting ? 'Extracting Profile...' : 'Extract Profile'}
-          </button>
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            {/* Enhanced Extraction Toggle */}
+            <button
+              onClick={() => setUseEnhancedExtraction(!useEnhancedExtraction)}
+              className={`px-4 py-2 rounded font-semibold text-sm border transition-colors ${
+                useEnhancedExtraction 
+                  ? 'bg-connection-green/20 border-connection-green text-connection-green' 
+                  : 'bg-os-dark border-depth-cyan/30 text-interface-light hover:border-depth-cyan'
+              }`}
+              title={useEnhancedExtraction ? 'Enhanced extraction enabled' : 'Enable enhanced extraction'}
+            >
+              {useEnhancedExtraction ? '🔍 Enhanced' : '⚡ Basic'}
+            </button>
+            <button
+              onClick={extractLinkedInProfile}
+              disabled={!userProfile.linkedinUrl || isExtracting}
+              className="w-full sm:w-auto bg-synergy-gold text-os-dark px-6 py-3 sm:py-2 rounded font-semibold hover:bg-synergy-light transition-colors disabled:opacity-50 text-base min-h-[44px]"
+            >
+              {isExtracting ? 'Extracting Profile...' : 'Extract Profile'}
+            </button>
+          </div>
         </div>
         
         {/* Extracted Profile Preview */}
