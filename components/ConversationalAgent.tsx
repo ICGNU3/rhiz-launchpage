@@ -798,7 +798,7 @@ export const ConversationalAgent = () => {
   }
 
   return (
-    <div className={`conversational-agent w-full h-full flex flex-col relative ${isMobile ? 'overflow-y-auto -webkit-overflow-scrolling-touch' : 'overflow-hidden'}`}>
+    <div className={`conversational-agent w-full flex flex-col relative`}>
       {/* Hidden audio element for playback */}
       <audio ref={audioRef} className="hidden" />
       
@@ -925,7 +925,7 @@ export const ConversationalAgent = () => {
       </AnimatePresence>
 
       {/* Messages Display with Enhanced Visualization */}
-      <div className="flex-1 overflow-y-auto mb-4 space-y-3 max-h-40">
+              <div className="flex-1 mb-4 space-y-3">
         {messages.length === 0 ? (
           <motion.div 
             initial={{ opacity: 0 }}

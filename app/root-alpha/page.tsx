@@ -519,7 +519,7 @@ export default function Home() {
       <StickyCTA />
 
       {/* Hero Section - Mobile-First Responsive Control Room */}
-      <section className="hero-section min-h-screen relative bg-gradient-to-br from-os-dark via-os-darker to-os-dark w-full pt-24">
+      <section className="hero-section relative bg-gradient-to-br from-os-dark via-os-darker to-os-dark w-full pt-24">
         {/* Multi-Layer Animated Backgrounds - Optimized for Mobile */}
         <div className="absolute inset-0">
           {/* Primary Grid - Responsive Density */}
@@ -598,7 +598,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto relative z-10 min-h-screen flex flex-col px-4">
+        <div className="max-w-7xl mx-auto relative z-10 flex flex-col px-4 py-16">
           {/* Floating Status Panels - Hidden on Mobile */}
           {!isMobile && (
             <div className="absolute z-20 top-24 left-4 right-4">

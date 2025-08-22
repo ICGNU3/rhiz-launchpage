@@ -75,7 +75,7 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section className="min-h-screen relative bg-gradient-to-br from-os-dark via-os-darker to-os-dark w-full pt-16">
+      <section className="relative bg-gradient-to-br from-os-dark via-os-darker to-os-dark w-full pt-16">
         {/* Background Effects */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 opacity-10">
@@ -95,7 +95,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto relative z-10 min-h-screen flex flex-col px-4">
+        <div className="max-w-7xl mx-auto relative z-10 flex flex-col px-4 py-16">
           <div className={`text-center flex-grow flex flex-col justify-center ${
             isMobile ? 'mt-16 mb-6 px-4' : 'mt-32 mb-8'
           }`}>
