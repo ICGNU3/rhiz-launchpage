@@ -255,8 +255,8 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
           {
             type: 'network_analysis',
             title: 'Network Intelligence',
-            description: `Real-time analysis of ${analysis.totalConnections.toLocaleString()} connections`,
-            value: `$${(analysis.averageValue / 1000000).toFixed(1)}M average value`,
+            description: `Real-time analysis of ${analysis.totalConnections.toLocaleString()} connections with ${analysis.synergyScore}/100 synergy score`,
+            value: `$${(analysis.averageValue / 1000000).toFixed(1)}M average connection value`,
             connections: NETWORK_DATA.nodes.slice(0, 5),
             confidence: analysis.synergyScore,
             priority: 'critical'
@@ -264,17 +264,17 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
           {
             type: 'opportunities',
             title: 'Strategic Opportunities',
-            description: analysis.opportunities.slice(0, 2).join(', '),
-            value: `${analysis.networkDensity}% network density`,
+            description: `Found ${analysis.opportunities.length} high-value opportunities in your network`,
+            value: `${analysis.networkDensity}% network density - excellent connectivity`,
             connections: [],
             confidence: 92,
             priority: 'high'
           },
           {
             type: 'recommendations',
-            title: 'AI Recommendations',
-            description: analysis.recommendations.slice(0, 2).join(', '),
-            value: `${analysis.skillGaps.length} skill gaps identified`,
+            title: 'AI-Powered Recommendations',
+            description: analysis.recommendations.slice(0, 2).join('. '),
+            value: `${analysis.skillGaps.length} skill gaps identified for strategic development`,
             connections: [],
             confidence: 88,
             priority: 'medium'
@@ -322,9 +322,9 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
             if (skillMatches.length > 0) {
               newInsights.push({
                 type: 'skill_match',
-                title: 'Skill-Based Connections',
-                description: `Found ${skillMatches.length} people with matching skills`,
-                value: `$${skillMatches.reduce((sum, node) => sum + parseInt(node.value.replace(/[^0-9]/g, '')), 0)}K potential value`,
+                title: 'Skill-Based Synergies',
+                description: `Identified ${skillMatches.length} professionals with complementary skills in your network`,
+                value: `$${skillMatches.reduce((sum, node) => sum + parseInt(node.value.replace(/[^0-9]/g, '')), 0)}K potential collaboration value`,
                 connections: skillMatches.slice(0, 5),
                 confidence: 94,
                 priority: 'high'
@@ -342,9 +342,9 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
             if (industryMatches.length > 0) {
               newInsights.push({
                 type: 'industry_match',
-                title: 'Industry Connections',
-                description: `${industryMatches.length} people in your industry`,
-                value: `$${industryMatches.reduce((sum, node) => sum + parseInt(node.value.replace(/[^0-9]/g, '')), 0)}K network value`,
+                title: 'Industry Intelligence',
+                description: `${industryMatches.length} strategic connections in your industry with deep domain expertise`,
+                value: `$${industryMatches.reduce((sum, node) => sum + parseInt(node.value.replace(/[^0-9]/g, '')), 0)}K industry network value`,
                 connections: industryMatches.slice(0, 5),
                 confidence: 87,
                 priority: 'medium'
@@ -359,9 +359,9 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
           
           newInsights.push({
             type: 'high_value',
-            title: 'High-Value Opportunities',
-            description: 'Top 10 most valuable connections',
-            value: `$${highValueNodes.reduce((sum, node) => sum + parseInt(node.value.replace(/[^0-9]/g, '')), 0)}K total value`,
+            title: 'High-Value Network Assets',
+            description: 'Top 10 most valuable connections with strategic relationship potential',
+            value: `$${highValueNodes.reduce((sum, node) => sum + parseInt(node.value.replace(/[^0-9]/g, '')), 0)}K total strategic value`,
             connections: highValueNodes,
             confidence: 96,
             priority: 'critical'
@@ -408,9 +408,9 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
     <div className="w-full max-w-7xl mx-auto">
       {/* LinkedIn Profile Input */}
       <div className="bg-os-darker/50 rounded-lg p-6 mb-8 border border-synergy-gold/30">
-        <h3 className="text-xl font-bold text-synergy-gold mb-4">Connect Your LinkedIn Profile</h3>
+        <h3 className="text-xl font-bold text-synergy-gold mb-4">Network Intelligence Analysis</h3>
         <p className="text-interface-light mb-6">
-          Enter your LinkedIn URL and we'll automatically analyze your profile to find the most valuable connections for your goals.
+          Experience how RHIZ analyzes your professional network to identify opportunities, connections, and strategic insights. Enter your LinkedIn URL or try our demo profiles.
         </p>
         
         <div className="mb-4 p-3 bg-os-dark/30 rounded border border-synergy-gold/20">
