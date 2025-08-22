@@ -329,47 +329,47 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
         
         <div className="mb-4 p-3 bg-os-dark/30 rounded border border-synergy-gold/20">
           <p className="text-sm text-interface-light mb-2">💡 Try these example profiles:</p>
-          <div className="flex flex-wrap gap-2 text-xs">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 text-xs">
             <button
               onClick={() => setUserProfile(prev => ({ ...prev, linkedinUrl: 'https://linkedin.com/in/john-doe' }))}
-              className="text-synergy-gold hover:text-synergy-light transition-colors"
+              className="text-synergy-gold hover:text-synergy-light transition-colors p-2 rounded border border-synergy-gold/20 min-h-[44px] flex items-center justify-center"
             >
               john-doe (Tech)
             </button>
             <button
               onClick={() => setUserProfile(prev => ({ ...prev, linkedinUrl: 'https://linkedin.com/in/sarah-chen' }))}
-              className="text-synergy-gold hover:text-synergy-light transition-colors"
+              className="text-synergy-gold hover:text-synergy-light transition-colors p-2 rounded border border-synergy-gold/20 min-h-[44px] flex items-center justify-center"
             >
               sarah-chen (Product)
             </button>
             <button
               onClick={() => setUserProfile(prev => ({ ...prev, linkedinUrl: 'https://linkedin.com/in/mike-rodriguez' }))}
-              className="text-synergy-gold hover:text-synergy-light transition-colors"
+              className="text-synergy-gold hover:text-synergy-light transition-colors p-2 rounded border border-synergy-gold/20 min-h-[44px] flex items-center justify-center"
             >
               mike-rodriguez (Sales)
             </button>
             <button
               onClick={() => setUserProfile(prev => ({ ...prev, linkedinUrl: 'https://linkedin.com/in/emily-watson' }))}
-              className="text-synergy-gold hover:text-synergy-light transition-colors"
+              className="text-synergy-gold hover:text-synergy-light transition-colors p-2 rounded border border-synergy-gold/20 min-h-[44px] flex items-center justify-center"
             >
               emily-watson (Marketing)
             </button>
             <button
               onClick={() => setUserProfile(prev => ({ ...prev, linkedinUrl: 'https://linkedin.com/in/david-kim' }))}
-              className="text-synergy-gold hover:text-synergy-light transition-colors"
+              className="text-synergy-gold hover:text-synergy-light transition-colors p-2 rounded border border-synergy-gold/20 min-h-[44px] flex items-center justify-center sm:col-span-2"
             >
               david-kim (Data Science)
             </button>
           </div>
         </div>
         
-        <div className="flex gap-4 items-end">
-          <div className="flex-1">
+        <div className="flex flex-col sm:flex-row gap-4 items-end">
+          <div className="flex-1 w-full">
             <label className="block text-interface-light mb-2">LinkedIn Profile URL</label>
             <input
               type="url"
               placeholder="https://linkedin.com/in/your-profile"
-              className="w-full bg-os-dark border border-synergy-gold/30 rounded px-3 py-2 text-interface-light"
+              className="w-full bg-os-dark border border-synergy-gold/30 rounded px-3 py-3 sm:py-2 text-interface-light text-base"
               value={userProfile.linkedinUrl}
               onChange={(e) => setUserProfile(prev => ({ ...prev, linkedinUrl: e.target.value }))}
             />
@@ -377,7 +377,7 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
           <button
             onClick={extractLinkedInProfile}
             disabled={!userProfile.linkedinUrl || isExtracting}
-            className="bg-synergy-gold text-os-dark px-6 py-2 rounded font-semibold hover:bg-synergy-light transition-colors disabled:opacity-50"
+            className="w-full sm:w-auto bg-synergy-gold text-os-dark px-6 py-3 sm:py-2 rounded font-semibold hover:bg-synergy-light transition-colors disabled:opacity-50 text-base min-h-[44px]"
           >
             {isExtracting ? 'Extracting Profile...' : 'Extract Profile'}
           </button>
@@ -391,10 +391,10 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
             className="mt-6 p-4 bg-os-dark/50 rounded border border-depth-cyan/30"
           >
             <h4 className="text-depth-cyan font-semibold mb-3">Extracted Profile Data</h4>
-            <div className="grid md:grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-interface-light">Skills: </span>
-                <span className="text-synergy-gold">{userProfile.skills.join(', ')}</span>
+                <span className="text-synergy-gold break-words">{userProfile.skills.join(', ')}</span>
               </div>
               <div>
                 <span className="text-interface-light">Industry: </span>
@@ -406,13 +406,13 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
               </div>
               <div>
                 <span className="text-interface-light">Goals: </span>
-                <span className="text-synergy-gold">{userProfile.goals.join(', ')}</span>
+                <span className="text-synergy-gold break-words">{userProfile.goals.join(', ')}</span>
               </div>
             </div>
             <button
               onClick={generateInsights}
               disabled={isAnalyzing}
-              className="mt-4 bg-connection-green text-os-dark px-6 py-2 rounded font-semibold hover:bg-connection-green/80 transition-colors disabled:opacity-50"
+              className="mt-4 w-full bg-connection-green text-os-dark px-6 py-3 rounded font-semibold hover:bg-connection-green/80 transition-colors disabled:opacity-50 text-base min-h-[44px]"
             >
               {isAnalyzing ? 'Analyzing Network...' : 'Analyze My Network'}
             </button>
@@ -545,79 +545,7 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
         </motion.div>
       )}
 
-      {/* Network Intelligence Dashboard */}
-      {insights.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid lg:grid-cols-3 gap-8 mb-8"
-        >
-          {/* Network Metrics */}
-          <div className="bg-os-darker/50 rounded-lg p-6 border border-synergy-gold/30">
-            <h3 className="text-xl font-bold text-synergy-gold mb-4">Network Metrics</h3>
-            <div className="space-y-4">
-              <div className="flex justify-between">
-                <span className="text-interface-light">Total Connections:</span>
-                <span className="text-synergy-gold font-mono">{networkMetrics.totalConnections.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-interface-light">Average Value:</span>
-                <span className="text-synergy-gold font-mono">${networkMetrics.averageValue.toFixed(0)}K</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-interface-light">Network Density:</span>
-                <span className="text-synergy-gold font-mono">87%</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-interface-light">Synergy Score:</span>
-                <span className="text-connection-green font-mono">94/100</span>
-              </div>
-            </div>
-          </div>
 
-          {/* Top Industries */}
-          <div className="bg-os-darker/50 rounded-lg p-6 border border-depth-cyan/30">
-            <h3 className="text-xl font-bold text-depth-cyan mb-4">Top Industries</h3>
-            <div className="space-y-3">
-              {networkMetrics.topIndustries.map((industry, index) => (
-                <div key={industry} className="flex justify-between items-center">
-                  <span className="text-interface-light">{industry}</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-16 bg-os-dark rounded-full h-2">
-                      <div 
-                        className="bg-depth-cyan h-2 rounded-full" 
-                        style={{ width: `${85 - index * 15}%` }}
-                      />
-                    </div>
-                    <span className="text-depth-cyan text-sm font-mono">{85 - index * 15}%</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Skill Gaps */}
-          <div className="bg-os-darker/50 rounded-lg p-6 border border-connection-green/30">
-            <h3 className="text-xl font-bold text-connection-green mb-4">Skill Gaps</h3>
-            <div className="space-y-3">
-              {networkMetrics.skillGaps.map((skill, index) => (
-                <div key={skill} className="flex justify-between items-center">
-                  <span className="text-interface-light">{skill}</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-16 bg-os-dark rounded-full h-2">
-                      <div 
-                        className="bg-connection-green h-2 rounded-full" 
-                        style={{ width: `${70 - index * 10}%` }}
-                      />
-                    </div>
-                    <span className="text-connection-green text-sm font-mono">{70 - index * 10}%</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-      )}
 
 
 

@@ -42,7 +42,7 @@ export default function Home() {
               <div className="font-mono text-synergy-gold font-bold text-lg">RHIZ</div>
             </div>
             
-            <div className="flex items-center gap-6">
+            <div className="hidden sm:flex items-center gap-6">
               <a href="#about" className="text-interface-light hover:text-synergy-gold transition-colors">
                 About
               </a>
@@ -59,6 +59,17 @@ export default function Home() {
                 Join Root Alpha
               </a>
             </div>
+            
+            {/* Mobile Menu Button */}
+            <button 
+              className="sm:hidden p-2 text-interface-light hover:text-synergy-gold transition-colors min-h-[44px] min-w-[44px]"
+              aria-label="Open mobile menu"
+              title="Open mobile menu"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
           </div>
         </div>
       </nav>
@@ -86,7 +97,7 @@ export default function Home() {
 
         <div className="max-w-7xl mx-auto relative z-10 min-h-screen flex flex-col px-4">
           <div className={`text-center flex-grow flex flex-col justify-center ${
-            isMobile ? 'mt-20 mb-6 px-2' : 'mt-32 mb-8'
+            isMobile ? 'mt-16 mb-6 px-4' : 'mt-32 mb-8'
           }`}>
             {/* Main Title */}
             <motion.div 

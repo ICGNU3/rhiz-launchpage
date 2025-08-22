@@ -55,6 +55,16 @@ export const ConversationalAgent = () => {
   // Mobile detection
   const [isMobile, setIsMobile] = useState(false)
   
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+  
   // Core States
   const [aiState, setAIState] = useState<AIState>('idle')
   const [messages, setMessages] = useState<Message[]>([])
@@ -788,7 +798,7 @@ export const ConversationalAgent = () => {
   }
 
   return (
-    <div className={`conversational-agent w-full h-full flex flex-col relative ${isMobile ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+    <div className={`conversational-agent w-full h-full flex flex-col relative ${isMobile ? 'overflow-y-auto -webkit-overflow-scrolling-touch' : 'overflow-hidden'}`}>
       {/* Hidden audio element for playback */}
       <audio ref={audioRef} className="hidden" />
       
@@ -934,7 +944,7 @@ export const ConversationalAgent = () => {
             <div className="text-depth-cyan">Ask about synergies, network depth, or collaboration opportunities</div>
           </motion.div>
         ) : (
-          messages.slice(isMobile ? -2 : -3).map((message) => (
+                      messages.slice(isMobile ? -3 : -5).map((message) => (
             <motion.div
               key={message.id}
               initial={{ opacity: 0, y: 10 }}
@@ -1167,7 +1177,7 @@ export const ConversationalAgent = () => {
       )}
 
       {/* Enhanced Input Area */}
-      <div className={`flex items-center gap-2 ${isMobile ? 'gap-3' : ''}`}>
+      <div className={`flex items-center gap-2 ${isMobile ? 'gap-3 flex-col sm:flex-row' : ''}`}>
         {/* AI State Indicator - Hidden on mobile for space */}
         {!isMobile && (
           <motion.div 
@@ -1253,12 +1263,14 @@ export const ConversationalAgent = () => {
           disabled={aiState === 'processing' || aiState === 'speaking' || !isConnected}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className={`w-14 h-14 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all relative overflow-hidden touch-manipulation ${
+          className={`w-16 h-16 sm:w-14 sm:h-14 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all relative overflow-hidden touch-manipulation ${
             aiState === 'listening'
               ? 'bg-gradient-to-r from-alert-magenta to-alert-purple shadow-lg'
               : 'bg-gradient-to-r from-connection-green to-connection-light hover:shadow-lg'
           } ${(aiState === 'processing' || aiState === 'speaking' || !isConnected) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-          style={{ minHeight: '56px', minWidth: '56px' }}
+          style={{ minHeight: '64px', minWidth: '64px' }}
+          aria-label={aiState === 'listening' ? 'Stop listening' : 'Start voice input'}
+          title={aiState === 'listening' ? 'Stop listening' : 'Start voice input'}
         >
           <AnimatePresence mode="wait">
             {aiState === 'listening' ? (
@@ -1294,7 +1306,7 @@ export const ConversationalAgent = () => {
         </motion.button>
 
         {/* Text Input */}
-        <form onSubmit={handleTextSubmit} className="flex-1">
+        <form onSubmit={handleTextSubmit} className="flex-1 w-full">
           <input
             type="text"
             value={currentInput}
