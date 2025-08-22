@@ -161,6 +161,20 @@ body::before {
   button, a, input, textarea {
     pointer-events: auto;
   }
+  
+  /* Fix TypewriterText overflow on mobile */
+  .break-words {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+  }
+  
+  /* Ensure text containers don't overflow */
+  .text-container {
+    overflow: hidden;
+    word-wrap: break-word;
+  }
 
   /* Improve main container scrolling */
   main, .main-container {

@@ -682,32 +682,34 @@ export default function Home() {
               
               <div className={`text-os-light leading-relaxed max-w-4xl mx-auto relative ${
                 isMobile 
-                  ? 'text-lg mb-6' 
+                  ? 'text-base mb-6' 
                   : 'text-2xl sm:text-3xl mb-8'
               }`}>
                 <div className={`bg-os-darker/30 backdrop-blur-sm border border-synergy-gold/30 rounded-lg shadow-2xl ${
                   isMobile ? 'p-4' : 'p-6'
                 }`}>
-                  <TypewriterText 
-                    text="Exclusive early access to RHIZ AI."
-                    delay={1500}
-                    speed={40}
-                    className="text-depth-cyan"
-                  />
-                  <br/>
-                  <TypewriterText 
-                    text="You've been personally selected for lifetime membership."
-                    delay={3000}
-                    speed={35}
-                    className="text-synergy-gold font-semibold"
-                  />
-                  <br/>
-                  <TypewriterText 
-                    text="Join the first 150 founding members."
-                    delay={5000}
-                    speed={40}
-                    className="text-connection-green"
-                  />
+                  <div className={`${isMobile ? 'text-sm leading-tight' : ''}`}>
+                    <TypewriterText 
+                      text="Exclusive early access to RHIZ AI."
+                      delay={1500}
+                      speed={40}
+                      className="text-depth-cyan break-words"
+                    />
+                    <br/>
+                    <TypewriterText 
+                      text="You've been personally selected for lifetime membership."
+                      delay={3000}
+                      speed={35}
+                      className="text-synergy-gold font-semibold break-words"
+                    />
+                    <br/>
+                    <TypewriterText 
+                      text="Join the first 150 founding members."
+                      delay={5000}
+                      speed={40}
+                      className="text-connection-green break-words"
+                    />
+                  </div>
                 </div>
               {/* Data streams around the subtitle - Hidden on Mobile */}
               {!isMobile && (

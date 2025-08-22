@@ -129,32 +129,34 @@ export default function Home() {
             {/* Subtitle */}
             <div className={`text-os-light leading-relaxed max-w-4xl mx-auto relative ${
               isMobile 
-                ? 'text-lg mb-6' 
+                ? 'text-base mb-6' 
                 : 'text-2xl sm:text-3xl mb-8'
             }`}>
               <div className={`bg-os-darker/30 backdrop-blur-sm border border-synergy-gold/30 rounded-lg shadow-2xl ${
                 isMobile ? 'p-4' : 'p-6'
               }`}>
-                <TypewriterText 
-                  text="The world's first AI-powered relationship intelligence system."
-                  delay={1000}
-                  speed={40}
-                  className="text-depth-cyan"
-                />
-                <br/>
-                <TypewriterText 
-                  text="Automatically captures, analyzes, and optimizes your professional network."
-                  delay={3000}
-                  speed={35}
-                  className="text-synergy-gold font-semibold"
-                />
-                <br/>
-                <TypewriterText 
-                  text="Transform how you build and leverage relationships."
-                  delay={5000}
-                  speed={40}
-                  className="text-connection-green"
-                />
+                <div className={`${isMobile ? 'text-sm leading-tight' : ''}`}>
+                  <TypewriterText 
+                    text="The world's first AI-powered relationship intelligence system."
+                    delay={1000}
+                    speed={40}
+                    className="text-depth-cyan break-words"
+                  />
+                  <br/>
+                  <TypewriterText 
+                    text="Automatically captures, analyzes, and optimizes your professional network."
+                    delay={3000}
+                    speed={35}
+                    className="text-synergy-gold font-semibold break-words"
+                  />
+                  <br/>
+                  <TypewriterText 
+                    text="Transform how you build and leverage relationships."
+                    delay={5000}
+                    speed={40}
+                    className="text-connection-green break-words"
+                  />
+                </div>
               </div>
             </div>
 
