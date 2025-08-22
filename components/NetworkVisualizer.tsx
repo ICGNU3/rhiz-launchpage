@@ -105,9 +105,7 @@ interface NetworkVisualizerProps {
 }
 
 export default function NetworkVisualizer({ userGoals = [], userSkills = [], onInsightGenerated }: NetworkVisualizerProps) {
-  const [selectedNode, setSelectedNode] = useState<any>(null)
-  const [hoveredNode, setHoveredNode] = useState<any>(null)
-  const [filteredNodes, setFilteredNodes] = useState(NETWORK_DATA.nodes)
+
   const [insights, setInsights] = useState<any[]>([])
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [userProfile, setUserProfile] = useState({
@@ -128,8 +126,7 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
     opportunities: [] as string[]
   })
   
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const animationRef = useRef<number>()
+
 
   // Extract profile data from LinkedIn URL
   const extractLinkedInProfile = useCallback(async () => {
@@ -305,31 +302,12 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
     }, 800)
   }, [userProfile, onInsightGenerated])
 
-  // Initialize canvas and draw network
+  // Calculate network metrics when insights are generated
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    
-    const resizeCanvas = () => {
-      canvas.width = canvas.offsetWidth * window.devicePixelRatio
-      canvas.height = canvas.offsetHeight * window.devicePixelRatio
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
-    }
-    
-    resizeCanvas()
-    window.addEventListener('resize', resizeCanvas)
-    
-    const drawNetwork = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      
-      // Calculate dynamic metrics based on current network
+    if (insights.length > 0) {
       const totalConnections = NETWORK_DATA.nodes.reduce((sum, node) => sum + node.connections, 0)
       const averageValue = NETWORK_DATA.nodes.reduce((sum, node) => sum + parseInt(node.value.replace(/[^0-9]/g, '')), 0) / NETWORK_DATA.nodes.length
       
-      // Update network metrics
       setNetworkMetrics({
         totalConnections,
         averageValue,
@@ -337,160 +315,8 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
         skillGaps: ['AI/ML', 'Data Science', 'Product Management'],
         opportunities: ['Investment', 'Partnership', 'Mentorship']
       })
-      
-      // Draw edges with dynamic colors based on connection strength
-      NETWORK_DATA.edges.forEach(edge => {
-        const sourceNode = NETWORK_DATA.nodes.find(n => n.id === edge.source)
-        const targetNode = NETWORK_DATA.nodes.find(n => n.id === edge.target)
-        
-        if (sourceNode && targetNode) {
-          const x1 = (sourceNode.id % 10) * 80 + 40
-          const y1 = Math.floor(sourceNode.id / 10) * 80 + 40
-          const x2 = (targetNode.id % 10) * 80 + 40
-          const y2 = Math.floor(targetNode.id / 10) * 80 + 40
-          
-          // Dynamic edge colors based on connection type
-          let edgeColor
-          switch(edge.type) {
-            case 'investment':
-              edgeColor = `rgba(255, 215, 0, ${edge.strength * 0.8})` // Gold
-              break
-            case 'partnership':
-              edgeColor = `rgba(0, 206, 209, ${edge.strength * 0.7})` // Cyan
-              break
-            case 'accelerator':
-              edgeColor = `rgba(34, 197, 94, ${edge.strength * 0.6})` // Green
-              break
-            default:
-              edgeColor = `rgba(255, 215, 0, ${edge.strength * 0.4})` // Default gold
-          }
-          
-          ctx.beginPath()
-          ctx.moveTo(x1, y1)
-          ctx.lineTo(x2, y2)
-          ctx.strokeStyle = edgeColor
-          ctx.lineWidth = edge.strength * 4
-          ctx.stroke()
-        }
-      })
-      
-      // Draw nodes as colored globes
-      NETWORK_DATA.nodes.forEach(node => {
-        const x = (node.id % 10) * 80 + 40
-        const y = Math.floor(node.id / 10) * 80 + 40
-        
-        // Calculate node size based on connections
-        const nodeSize = Math.max(15, Math.min(35, node.connections / 20))
-        
-        // Determine node color based on industry/role
-        let nodeColor
-        if (node.title.includes('CEO') || node.title.includes('Founder')) {
-          nodeColor = '#FFD700' // Gold for leaders
-        } else if (node.title.includes('Engineer') || node.title.includes('CTO')) {
-          nodeColor = '#00CED1' // Cyan for tech
-        } else if (node.title.includes('Sales') || node.title.includes('VP')) {
-          nodeColor = '#34D1BE' // Teal for business
-        } else if (node.title.includes('Investor') || node.title.includes('Partner')) {
-          nodeColor = '#FF6B6B' // Red for investors
-        } else if (node.title.includes('Product') || node.title.includes('Design')) {
-          nodeColor = '#4ECDC4' // Mint for product
-        } else {
-          nodeColor = '#A8E6CF' // Light green for others
-        }
-        
-        // Draw globe with gradient effect
-        const gradient = ctx.createRadialGradient(x, y, 0, x, y, nodeSize)
-        gradient.addColorStop(0, nodeColor)
-        gradient.addColorStop(0.7, nodeColor)
-        gradient.addColorStop(1, `${nodeColor}80`)
-        
-        ctx.beginPath()
-        ctx.arc(x, y, nodeSize, 0, 2 * Math.PI)
-        ctx.fillStyle = selectedNode?.id === node.id ? '#FFD700' : gradient
-        ctx.fill()
-        
-        // Add highlight for selected node
-        if (selectedNode?.id === node.id) {
-          ctx.beginPath()
-          ctx.arc(x, y, nodeSize + 5, 0, 2 * Math.PI)
-          ctx.strokeStyle = '#FFD700'
-          ctx.lineWidth = 3
-          ctx.stroke()
-        }
-        
-        // Hover effect
-        if (hoveredNode?.id === node.id) {
-          ctx.beginPath()
-          ctx.arc(x, y, nodeSize + 8, 0, 2 * Math.PI)
-          ctx.strokeStyle = '#FFD700'
-          ctx.lineWidth = 2
-          ctx.stroke()
-          
-          // Show node info on hover
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.9)'
-          ctx.fillRect(x + 15, y - 30, 120, 60)
-          ctx.fillStyle = '#FFD700'
-          ctx.font = '12px Arial'
-          ctx.textAlign = 'left'
-          ctx.fillText(node.name, x + 20, y - 15)
-          ctx.fillStyle = '#FFFFFF'
-          ctx.font = '10px Arial'
-          ctx.fillText(node.title, x + 20, y)
-          ctx.fillText(node.value, x + 20, y + 15)
-        }
-      })
-      
-      animationRef.current = requestAnimationFrame(drawNetwork)
     }
-    
-    drawNetwork()
-    
-    return () => {
-      window.removeEventListener('resize', resizeCanvas)
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current)
-      }
-    }
-  }, [selectedNode, hoveredNode])
-
-  // Handle canvas interactions
-  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    
-    const rect = canvas.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-    
-    // Find clicked node
-    const clickedNode = NETWORK_DATA.nodes.find(node => {
-      const nodeX = (node.id % 10) * 80 + 40
-      const nodeY = Math.floor(node.id / 10) * 80 + 40
-      const distance = Math.sqrt((x - nodeX) ** 2 + (y - nodeY) ** 2)
-      return distance <= 20
-    })
-    
-    setSelectedNode(clickedNode || null)
-  }
-
-  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    
-    const rect = canvas.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-    
-    // Find hovered node
-    const hovered = NETWORK_DATA.nodes.find(node => {
-      const nodeX = (node.id % 10) * 80 + 40
-      const nodeY = Math.floor(node.id / 10) * 80 + 40
-      const distance = Math.sqrt((x - nodeX) ** 2 + (y - nodeY) ** 2)
-      return distance <= 20
-    })
-    
-    setHoveredNode(hovered || null)
-  }
+  }, [insights])
 
   return (
     <div className="w-full max-w-7xl mx-auto">
@@ -793,79 +619,7 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
         </motion.div>
       )}
 
-      {/* Network Visualization */}
-      <div className="bg-os-darker/30 rounded-lg p-6 mb-8 border border-depth-cyan/30">
-        <h3 className="text-xl font-bold text-depth-cyan mb-4">Network Intelligence Visualization</h3>
-        <div className="relative">
-          <canvas
-            ref={canvasRef}
-            className="w-full h-96 border border-synergy-gold/20 rounded cursor-pointer"
-            onClick={handleCanvasClick}
-            onMouseMove={handleCanvasMouseMove}
-          />
-          
-          {/* Network Stats */}
-          <div className="absolute top-4 right-4 bg-os-darker/90 backdrop-blur-sm rounded p-3 border border-synergy-gold/30">
-            <div className="text-sm text-interface-light">
-              <div>Nodes: {NETWORK_DATA.nodes.length}</div>
-              <div>Connections: {NETWORK_DATA.edges.length}</div>
-              <div>Total Value: $47.2M</div>
-            </div>
-          </div>
-          
-          {/* Network Legend */}
-          <div className="absolute bottom-4 left-4 bg-os-darker/90 backdrop-blur-sm rounded p-3 border border-synergy-gold/30">
-            <div className="text-sm text-interface-light mb-2 font-semibold">Network Legend</div>
-            <div className="space-y-1 text-xs">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                <span>Leaders (CEO/Founder)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-cyan-400"></div>
-                <span>Tech (Engineer/CTO)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-teal-400"></div>
-                <span>Business (Sales/VP)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                <span>Investors</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-mint-400"></div>
-                <span>Product/Design</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Selected Node Details */}
-      {selectedNode && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-os-darker/50 rounded-lg p-6 mb-8 border border-synergy-gold/30"
-        >
-          <div className="flex items-start gap-4">
-            <div className="text-4xl">{selectedNode.avatar}</div>
-            <div className="flex-1">
-              <h3 className="text-xl font-bold text-synergy-gold">{selectedNode.name}</h3>
-              <p className="text-interface-light mb-2">{selectedNode.title}</p>
-              <p className="text-connection-green mb-3">Network Value: {selectedNode.value}</p>
-              <div className="flex flex-wrap gap-2">
-                {selectedNode.skills.map((skill: string, index: number) => (
-                  <span key={index} className="bg-synergy-gold/20 text-synergy-gold px-2 py-1 rounded text-sm">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
 
       {/* Generated Insights */}
       <AnimatePresence>
