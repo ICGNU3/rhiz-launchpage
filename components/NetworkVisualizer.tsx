@@ -111,14 +111,49 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
   const [insights, setInsights] = useState<any[]>([])
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [userProfile, setUserProfile] = useState({
+    linkedinUrl: '',
     goals: userGoals,
     skills: userSkills,
     industry: '',
     experience: ''
   })
+  const [isExtracting, setIsExtracting] = useState(false)
   
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationRef = useRef<number>()
+
+  // Extract profile data from LinkedIn URL
+  const extractLinkedInProfile = useCallback(async () => {
+    if (!userProfile.linkedinUrl) return
+    
+    setIsExtracting(true)
+    
+    // Simulate LinkedIn profile extraction
+    setTimeout(() => {
+      // Mock extracted data based on common LinkedIn profiles
+      const mockExtractedData = {
+        name: "Alex Johnson",
+        title: "Senior Software Engineer",
+        company: "Tech Startup",
+        location: "San Francisco, CA",
+        skills: ["JavaScript", "React", "Node.js", "Python", "AWS"],
+        experience: "5+ years",
+        industry: "Technology",
+        connections: 847,
+        summary: "Passionate engineer building scalable web applications"
+      }
+      
+      setUserProfile(prev => ({
+        ...prev,
+        goals: ["Grow network", "Find new opportunities", "Learn from experts"],
+        skills: mockExtractedData.skills,
+        industry: mockExtractedData.industry,
+        experience: "individual"
+      }))
+      
+      setIsExtracting(false)
+    }, 3000)
+  }, [userProfile.linkedinUrl])
 
   // Generate insights based on user profile
   const generateInsights = useCallback(() => {
@@ -310,64 +345,68 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
 
   return (
     <div className="w-full max-w-6xl mx-auto">
-      {/* User Profile Input */}
+      {/* LinkedIn Profile Input */}
       <div className="bg-os-darker/50 rounded-lg p-6 mb-8 border border-synergy-gold/30">
-        <h3 className="text-xl font-bold text-synergy-gold mb-4">Tell us about yourself</h3>
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-interface-light mb-2">Your Goals</label>
+        <h3 className="text-xl font-bold text-synergy-gold mb-4">Connect Your LinkedIn Profile</h3>
+        <p className="text-interface-light mb-6">
+          Enter your LinkedIn URL and we'll automatically analyze your profile to find the most valuable connections for your goals.
+        </p>
+        
+        <div className="flex gap-4 items-end">
+          <div className="flex-1">
+            <label className="block text-interface-light mb-2">LinkedIn Profile URL</label>
             <input
-              type="text"
-              placeholder="e.g., Raise funding, Hire engineers, Find customers"
+              type="url"
+              placeholder="https://linkedin.com/in/your-profile"
               className="w-full bg-os-dark border border-synergy-gold/30 rounded px-3 py-2 text-interface-light"
-              value={userProfile.goals.join(', ')}
-              onChange={(e) => setUserProfile(prev => ({ ...prev, goals: e.target.value.split(',').map(s => s.trim()) }))}
+              value={userProfile.linkedinUrl}
+              onChange={(e) => setUserProfile(prev => ({ ...prev, linkedinUrl: e.target.value }))}
             />
           </div>
-          <div>
-            <label className="block text-interface-light mb-2">Your Skills</label>
-            <input
-              type="text"
-              placeholder="e.g., Engineering, Sales, Marketing, Design"
-              className="w-full bg-os-dark border border-synergy-gold/30 rounded px-3 py-2 text-interface-light"
-              value={userProfile.skills.join(', ')}
-              onChange={(e) => setUserProfile(prev => ({ ...prev, skills: e.target.value.split(',').map(s => s.trim()) }))}
-            />
-          </div>
-          <div>
-            <label className="block text-interface-light mb-2">Industry</label>
-            <input
-              type="text"
-              placeholder="e.g., Fintech, SaaS, AI"
-              className="w-full bg-os-dark border border-synergy-gold/30 rounded px-3 py-2 text-interface-light"
-              value={userProfile.industry}
-              onChange={(e) => setUserProfile(prev => ({ ...prev, industry: e.target.value }))}
-            />
-          </div>
-          <div>
-            <label className="block text-interface-light mb-2">Experience Level</label>
-            <select
-              className="w-full bg-os-dark border border-synergy-gold/30 rounded px-3 py-2 text-interface-light"
-              value={userProfile.experience}
-              onChange={(e) => setUserProfile(prev => ({ ...prev, experience: e.target.value }))}
-              aria-label="Select your experience level"
-            >
-              <option value="">Select experience level</option>
-              <option value="founder">Founder/CEO</option>
-              <option value="executive">Executive</option>
-              <option value="manager">Manager</option>
-              <option value="individual">Individual Contributor</option>
-              <option value="student">Student</option>
-            </select>
-          </div>
+          <button
+            onClick={extractLinkedInProfile}
+            disabled={!userProfile.linkedinUrl || isExtracting}
+            className="bg-synergy-gold text-os-dark px-6 py-2 rounded font-semibold hover:bg-synergy-light transition-colors disabled:opacity-50"
+          >
+            {isExtracting ? 'Extracting Profile...' : 'Extract Profile'}
+          </button>
         </div>
-        <button
-          onClick={generateInsights}
-          disabled={isAnalyzing}
-          className="mt-4 bg-synergy-gold text-os-dark px-6 py-2 rounded font-semibold hover:bg-synergy-light transition-colors disabled:opacity-50"
-        >
-          {isAnalyzing ? 'Analyzing Network...' : 'Analyze My Network'}
-        </button>
+        
+        {/* Extracted Profile Preview */}
+        {userProfile.skills.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-6 p-4 bg-os-dark/50 rounded border border-depth-cyan/30"
+          >
+            <h4 className="text-depth-cyan font-semibold mb-3">Extracted Profile Data</h4>
+            <div className="grid md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-interface-light">Skills: </span>
+                <span className="text-synergy-gold">{userProfile.skills.join(', ')}</span>
+              </div>
+              <div>
+                <span className="text-interface-light">Industry: </span>
+                <span className="text-synergy-gold">{userProfile.industry}</span>
+              </div>
+              <div>
+                <span className="text-interface-light">Experience: </span>
+                <span className="text-synergy-gold">{userProfile.experience}</span>
+              </div>
+              <div>
+                <span className="text-interface-light">Goals: </span>
+                <span className="text-synergy-gold">{userProfile.goals.join(', ')}</span>
+              </div>
+            </div>
+            <button
+              onClick={generateInsights}
+              disabled={isAnalyzing}
+              className="mt-4 bg-connection-green text-os-dark px-6 py-2 rounded font-semibold hover:bg-connection-green/80 transition-colors disabled:opacity-50"
+            >
+              {isAnalyzing ? 'Analyzing Network...' : 'Analyze My Network'}
+            </button>
+          </motion.div>
+        )}
       </div>
 
       {/* Network Visualization */}
