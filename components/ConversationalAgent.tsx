@@ -788,7 +788,7 @@ export const ConversationalAgent = () => {
   }
 
   return (
-    <div className={`w-full h-full flex flex-col relative ${isMobile ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+    <div className={`conversational-agent w-full h-full flex flex-col relative ${isMobile ? 'overflow-y-auto' : 'overflow-hidden'}`}>
       {/* Hidden audio element for playback */}
       <audio ref={audioRef} className="hidden" />
       
