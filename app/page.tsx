@@ -646,17 +646,24 @@ export default function Home() {
                 isMobile ? 'p-4' : 'p-6'
               }`}>
                 <TypewriterText 
-                  text="You've been personally selected for early access."
+                  text="The world's first AI-powered relationship intelligence system."
                   delay={1500}
                   speed={40}
                   className="text-depth-cyan"
                 />
                 <br/>
                 <TypewriterText 
-                  text="Join the first 150 relationship intelligence pioneers."
-                  className="text-synergy-gold font-semibold"
-                  delay={3500}
+                  text="Automatically captures, analyzes, and optimizes your professional network."
+                  delay={3000}
                   speed={35}
+                  className="text-synergy-gold font-semibold"
+                />
+                <br/>
+                <TypewriterText 
+                  text="You've been personally selected for early access."
+                  delay={5000}
+                  speed={40}
+                  className="text-connection-green"
                 />
               </div>
               {/* Data streams around the subtitle - Hidden on Mobile */}
@@ -992,6 +999,24 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Clear Value Proposition Section */}
+      <section className="py-8 px-4 sm:px-6 lg:px-8 bg-os-darker/30">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className={`font-bold mb-3 ${
+              isMobile ? 'text-2xl' : 'text-3xl sm:text-4xl'
+            }`}>
+              <span className="screen-light">THE $777 INVESTMENT THAT DELIVERS $200,000+ IN LIFETIME VALUE</span>
+            </h2>
+            <p className={`text-interface-light max-w-3xl mx-auto ${
+              isMobile ? 'text-base px-2' : 'text-lg'
+            }`}>
+              Why $777 today is worth $200,000+ tomorrow
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Value Proposition Section */}
       <section className={`py-8 px-4 sm:px-6 lg:px-8 bg-os-dark/50 ${
         isMobile ? 'pt-4' : ''
@@ -1001,12 +1026,12 @@ export default function Home() {
             <h2 className={`font-bold mb-3 ${
               isMobile ? 'text-2xl' : 'text-3xl sm:text-4xl'
             }`}>
-              <span className="screen-light">THE ROOT ALPHA VALUE STACK</span>
+              <span className="screen-light">WHAT IS RHIZ?</span>
             </h2>
             <p className={`text-interface-light max-w-3xl mx-auto ${
               isMobile ? 'text-base px-2' : 'text-lg'
             }`}>
-              Why $777 today is worth $200,000+ tomorrow
+              RHIZ is an AI system that automatically captures every conversation, meeting, and interaction, then uses advanced intelligence to identify hidden opportunities, optimize your network, and create strategic synergies that drive real business value.
             </p>
           </div>
 
@@ -1213,7 +1238,7 @@ export default function Home() {
               <h2 className={`font-bold text-synergy-gold mb-6 ${
                 isMobile ? 'text-xl' : 'text-2xl sm:text-3xl'
               }`}>
-                SYSTEM_ARCHITECTURE.md
+                HOW IT WORKS
               </h2>
               
               <div className={`gap-6 ${
