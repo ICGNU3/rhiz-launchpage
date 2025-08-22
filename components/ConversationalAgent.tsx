@@ -55,6 +55,10 @@ export const ConversationalAgent = () => {
   // Mobile detection
   const [isMobile, setIsMobile] = useState(false)
   
+  // Local AI enhancement state
+  const [useLocalAI, setUseLocalAI] = useState(false)
+  const [localAIAvailable, setLocalAIAvailable] = useState(false)
+  
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768)
@@ -63,6 +67,27 @@ export const ConversationalAgent = () => {
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+  
+  // Check if local AI is available on component mount
+  useEffect(() => {
+    const checkLocalAI = async () => {
+      try {
+        const response = await fetch('/api/local-ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: 'test', context: 'test' })
+        })
+        if (response.ok) {
+          const data = await response.json()
+          setLocalAIAvailable(data.source === 'local-ollama')
+        }
+      } catch (error) {
+        console.log('Local AI not available:', error)
+      }
+    }
+    
+    checkLocalAI()
   }, [])
   
   // Core States
@@ -821,7 +846,7 @@ export const ConversationalAgent = () => {
           </span>
         </div>
         
-        {/* Language Selector - Hidden on mobile for space */}
+        {/* Language Selector and Local AI Toggle - Hidden on mobile for space */}
         {!isMobile && (
           <div className="flex items-center gap-2">
             <select 
@@ -836,6 +861,21 @@ export const ConversationalAgent = () => {
                 </option>
               ))}
             </select>
+            
+            {/* Local AI Toggle */}
+            {localAIAvailable && (
+              <button
+                onClick={() => setUseLocalAI(!useLocalAI)}
+                className={`px-2 py-1 rounded text-xs border transition-colors ${
+                  useLocalAI 
+                    ? 'bg-connection-green/20 border-connection-green text-connection-green' 
+                    : 'bg-os-dark border-depth-cyan/30 text-interface-light hover:border-depth-cyan'
+                }`}
+                title={useLocalAI ? 'Using Local AI' : 'Switch to Local AI'}
+              >
+                {useLocalAI ? '🤖 Local' : '☁️ Cloud'}
+              </button>
+            )}
           </div>
         )}
       </div>
