@@ -128,9 +128,40 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
     
     setIsExtracting(true)
     
-    // Simulate LinkedIn profile extraction
-    setTimeout(() => {
-      // Mock extracted data based on common LinkedIn profiles
+    try {
+      const response = await fetch('/api/linkedin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ linkedinUrl: userProfile.linkedinUrl })
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to extract profile')
+      }
+      
+      const result = await response.json()
+      
+      if (result.success && result.data) {
+        const extractedData = result.data
+        
+        setUserProfile(prev => ({
+          ...prev,
+          goals: ["Grow network", "Find new opportunities", "Learn from experts"],
+          skills: extractedData.skills || [],
+          industry: extractedData.industry || '',
+          experience: extractedData.experience?.includes('senior') || extractedData.experience?.includes('director') ? 'executive' : 'individual'
+        }))
+        
+        // Show success message
+        console.log('Profile extracted successfully:', extractedData)
+      } else {
+        throw new Error(result.error || 'Failed to extract profile')
+      }
+    } catch (error) {
+      console.error('Profile extraction error:', error)
+      // Fallback to mock data if API fails
       const mockExtractedData = {
         name: "Alex Johnson",
         title: "Senior Software Engineer",
@@ -150,9 +181,9 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
         industry: mockExtractedData.industry,
         experience: "individual"
       }))
-      
+    } finally {
       setIsExtracting(false)
-    }, 3000)
+    }
   }, [userProfile.linkedinUrl])
 
   // Generate insights based on user profile
@@ -351,6 +382,42 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
         <p className="text-interface-light mb-6">
           Enter your LinkedIn URL and we'll automatically analyze your profile to find the most valuable connections for your goals.
         </p>
+        
+        <div className="mb-4 p-3 bg-os-dark/30 rounded border border-synergy-gold/20">
+          <p className="text-sm text-interface-light mb-2">💡 Try these example profiles:</p>
+          <div className="flex flex-wrap gap-2 text-xs">
+            <button
+              onClick={() => setUserProfile(prev => ({ ...prev, linkedinUrl: 'https://linkedin.com/in/john-doe' }))}
+              className="text-synergy-gold hover:text-synergy-light transition-colors"
+            >
+              john-doe (Tech)
+            </button>
+            <button
+              onClick={() => setUserProfile(prev => ({ ...prev, linkedinUrl: 'https://linkedin.com/in/sarah-chen' }))}
+              className="text-synergy-gold hover:text-synergy-light transition-colors"
+            >
+              sarah-chen (Product)
+            </button>
+            <button
+              onClick={() => setUserProfile(prev => ({ ...prev, linkedinUrl: 'https://linkedin.com/in/mike-rodriguez' }))}
+              className="text-synergy-gold hover:text-synergy-light transition-colors"
+            >
+              mike-rodriguez (Sales)
+            </button>
+            <button
+              onClick={() => setUserProfile(prev => ({ ...prev, linkedinUrl: 'https://linkedin.com/in/emily-watson' }))}
+              className="text-synergy-gold hover:text-synergy-light transition-colors"
+            >
+              emily-watson (Marketing)
+            </button>
+            <button
+              onClick={() => setUserProfile(prev => ({ ...prev, linkedinUrl: 'https://linkedin.com/in/david-kim' }))}
+              className="text-synergy-gold hover:text-synergy-light transition-colors"
+            >
+              david-kim (Data Science)
+            </button>
+          </div>
+        </div>
         
         <div className="flex gap-4 items-end">
           <div className="flex-1">
