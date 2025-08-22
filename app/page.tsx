@@ -825,23 +825,17 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="flex-1 flex items-center justify-center w-full">
-                    <div className="text-center">
-                      <div className={`text-interface-light ${
-                        isMobile ? 'text-sm px-2' : 'text-base'
-                      }`}>
-                        <span className="text-synergy-gold">◆</span> 
-                        {isMobile 
-                          ? 'AI Relationship Intelligence'
-                          : 'AI Relationship Intelligence System'
-                        } 
-                        <span className="text-synergy-gold">◆</span>
-                      </div>
-                      <div className={`text-interface-light ${
-                        isMobile ? 'mt-2 text-xs px-2' : 'mt-3 text-xs'
-                      }`}>
-                        Voice-enabled AI assistant for network optimization
-                      </div>
-                    </div>
+                    <ConversationalAgent />
+                  </div>
+                  <div className={`text-center text-interface-light ${
+                    isMobile ? 'mt-2 text-xs px-2' : 'mt-3 text-xs'
+                  }`}>
+                    <span className="text-synergy-gold">◆</span> 
+                    {isMobile 
+                      ? 'Ask about relationship insights'
+                      : 'Ask about relationship insights, synergy opportunities, or network optimization'
+                    } 
+                    <span className="text-synergy-gold">◆</span>
                   </div>
                 </div>
               </div>
@@ -1415,30 +1409,6 @@ export default function Home() {
             <div className="text-interface-light">
               Questions? Contact: israel.wilson@uncommonimpactstudio.com
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* AI Conversational Agent Section */}
-      <section className={`py-8 px-4 sm:px-6 lg:px-8 bg-os-darker/30 ${
-        isMobile ? 'py-6' : ''
-      }`}>
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <h2 className={`font-bold mb-3 ${
-              isMobile ? 'text-2xl' : 'text-3xl sm:text-4xl'
-            }`}>
-              <span className="screen-light">EXPERIENCE RHIZ AI</span>
-            </h2>
-            <p className={`text-interface-light max-w-3xl mx-auto ${
-              isMobile ? 'text-base px-2' : 'text-lg'
-            }`}>
-              Try our AI relationship intelligence system. Ask about networking, synergies, or business opportunities.
-            </p>
-          </div>
-          
-          <div className="max-w-4xl mx-auto">
-            <ConversationalAgent />
           </div>
         </div>
       </section>
