@@ -118,6 +118,15 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
     experience: ''
   })
   const [isExtracting, setIsExtracting] = useState(false)
+  const [analysisProgress, setAnalysisProgress] = useState(0)
+  const [currentAnalysisStep, setCurrentAnalysisStep] = useState('')
+  const [networkMetrics, setNetworkMetrics] = useState({
+    totalConnections: 0,
+    averageValue: 0,
+    topIndustries: [] as string[],
+    skillGaps: [] as string[],
+    opportunities: [] as string[]
+  })
   
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationRef = useRef<number>()
@@ -189,70 +198,111 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
   // Generate insights based on user profile
   const generateInsights = useCallback(() => {
     setIsAnalyzing(true)
+    setAnalysisProgress(0)
+    setCurrentAnalysisStep('Initializing network analysis...')
     
-    setTimeout(() => {
-      const newInsights = []
+    const steps = [
+      'Analyzing profile data...',
+      'Mapping skill connections...',
+      'Identifying industry synergies...',
+      'Calculating network value...',
+      'Generating strategic insights...',
+      'Finalizing recommendations...'
+    ]
+    
+    let currentStep = 0
+    
+    const progressInterval = setInterval(() => {
+      currentStep++
+      setAnalysisProgress((currentStep / steps.length) * 100)
+      setCurrentAnalysisStep(steps[currentStep - 1] || 'Complete')
       
-      // Match skills to network
-      if (userProfile.skills.length > 0) {
-        const skillMatches = NETWORK_DATA.nodes.filter(node => 
-          node.skills.some(skill => 
-            userProfile.skills.some(userSkill => 
-              userSkill.toLowerCase().includes(skill.toLowerCase()) ||
-              skill.toLowerCase().includes(userSkill.toLowerCase())
+      if (currentStep >= steps.length) {
+        clearInterval(progressInterval)
+        
+        setTimeout(() => {
+          const newInsights = []
+          
+          // Match skills to network
+          if (userProfile.skills.length > 0) {
+            const skillMatches = NETWORK_DATA.nodes.filter(node => 
+              node.skills.some(skill => 
+                userProfile.skills.some(userSkill => 
+                  userSkill.toLowerCase().includes(skill.toLowerCase()) ||
+                  skill.toLowerCase().includes(userSkill.toLowerCase())
+                )
+              )
             )
-          )
-        )
-        
-        if (skillMatches.length > 0) {
+            
+            if (skillMatches.length > 0) {
+              newInsights.push({
+                type: 'skill_match',
+                title: 'Skill-Based Connections',
+                description: `Found ${skillMatches.length} people with matching skills`,
+                value: `$${skillMatches.reduce((sum, node) => sum + parseInt(node.value.replace(/[^0-9]/g, '')), 0)}K potential value`,
+                connections: skillMatches.slice(0, 5),
+                confidence: 94,
+                priority: 'high'
+              })
+            }
+          }
+          
+          // Industry insights
+          if (userProfile.industry) {
+            const industryMatches = NETWORK_DATA.nodes.filter(node => 
+              node.company.toLowerCase().includes(userProfile.industry.toLowerCase()) ||
+              node.title.toLowerCase().includes(userProfile.industry.toLowerCase())
+            )
+            
+            if (industryMatches.length > 0) {
+              newInsights.push({
+                type: 'industry_match',
+                title: 'Industry Connections',
+                description: `${industryMatches.length} people in your industry`,
+                value: `$${industryMatches.reduce((sum, node) => sum + parseInt(node.value.replace(/[^0-9]/g, '')), 0)}K network value`,
+                connections: industryMatches.slice(0, 5),
+                confidence: 87,
+                priority: 'medium'
+              })
+            }
+          }
+          
+          // High-value opportunities
+          const highValueNodes = NETWORK_DATA.nodes
+            .sort((a, b) => parseInt(b.value.replace(/[^0-9]/g, '')) - parseInt(a.value.replace(/[^0-9]/g, '')))
+            .slice(0, 10)
+          
           newInsights.push({
-            type: 'skill_match',
-            title: 'Skill-Based Connections',
-            description: `Found ${skillMatches.length} people with matching skills`,
-            value: `$${skillMatches.reduce((sum, node) => sum + parseInt(node.value.replace(/[^0-9]/g, '')), 0)}K potential value`,
-            connections: skillMatches.slice(0, 5)
+            type: 'high_value',
+            title: 'High-Value Opportunities',
+            description: 'Top 10 most valuable connections',
+            value: `$${highValueNodes.reduce((sum, node) => sum + parseInt(node.value.replace(/[^0-9]/g, '')), 0)}K total value`,
+            connections: highValueNodes,
+            confidence: 96,
+            priority: 'critical'
           })
-        }
-      }
-      
-      // Industry insights
-      if (userProfile.industry) {
-        const industryMatches = NETWORK_DATA.nodes.filter(node => 
-          node.company.toLowerCase().includes(userProfile.industry.toLowerCase()) ||
-          node.title.toLowerCase().includes(userProfile.industry.toLowerCase())
-        )
-        
-        if (industryMatches.length > 0) {
-          newInsights.push({
-            type: 'industry_match',
-            title: 'Industry Connections',
-            description: `${industryMatches.length} people in your industry`,
-            value: `$${industryMatches.reduce((sum, node) => sum + parseInt(node.value.replace(/[^0-9]/g, '')), 0)}K network value`,
-            connections: industryMatches.slice(0, 5)
+          
+          // Calculate network metrics
+          const totalConnections = NETWORK_DATA.nodes.reduce((sum, node) => sum + node.connections, 0)
+          const averageValue = NETWORK_DATA.nodes.reduce((sum, node) => sum + parseInt(node.value.replace(/[^0-9]/g, '')), 0) / NETWORK_DATA.nodes.length
+          
+          setNetworkMetrics({
+            totalConnections,
+            averageValue,
+            topIndustries: ['Technology', 'Finance', 'Healthcare'],
+            skillGaps: ['AI/ML', 'Data Science', 'Product Management'],
+            opportunities: ['Investment', 'Partnership', 'Mentorship']
           })
-        }
+          
+          setInsights(newInsights)
+          setIsAnalyzing(false)
+          
+          if (onInsightGenerated) {
+            onInsightGenerated(newInsights)
+          }
+        }, 1000)
       }
-      
-      // High-value opportunities
-      const highValueNodes = NETWORK_DATA.nodes
-        .sort((a, b) => parseInt(b.value.replace(/[^0-9]/g, '')) - parseInt(a.value.replace(/[^0-9]/g, '')))
-        .slice(0, 10)
-      
-      newInsights.push({
-        type: 'high_value',
-        title: 'High-Value Opportunities',
-        description: 'Top 10 most valuable connections',
-        value: `$${highValueNodes.reduce((sum, node) => sum + parseInt(node.value.replace(/[^0-9]/g, '')), 0)}K total value`,
-        connections: highValueNodes
-      })
-      
-      setInsights(newInsights)
-      setIsAnalyzing(false)
-      
-      if (onInsightGenerated) {
-        onInsightGenerated(newInsights)
-      }
-    }, 2000)
+    }, 800)
   }, [userProfile, onInsightGenerated])
 
   // Initialize canvas and draw network
@@ -275,7 +325,20 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
     const drawNetwork = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       
-      // Draw edges
+      // Calculate dynamic metrics based on current network
+      const totalConnections = NETWORK_DATA.nodes.reduce((sum, node) => sum + node.connections, 0)
+      const averageValue = NETWORK_DATA.nodes.reduce((sum, node) => sum + parseInt(node.value.replace(/[^0-9]/g, '')), 0) / NETWORK_DATA.nodes.length
+      
+      // Update network metrics
+      setNetworkMetrics({
+        totalConnections,
+        averageValue,
+        topIndustries: ['Technology', 'Finance', 'Healthcare'],
+        skillGaps: ['AI/ML', 'Data Science', 'Product Management'],
+        opportunities: ['Investment', 'Partnership', 'Mentorship']
+      })
+      
+      // Draw edges with dynamic colors based on connection strength
       NETWORK_DATA.edges.forEach(edge => {
         const sourceNode = NETWORK_DATA.nodes.find(n => n.id === edge.source)
         const targetNode = NETWORK_DATA.nodes.find(n => n.id === edge.target)
@@ -286,39 +349,94 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
           const x2 = (targetNode.id % 10) * 80 + 40
           const y2 = Math.floor(targetNode.id / 10) * 80 + 40
           
+          // Dynamic edge colors based on connection type
+          let edgeColor
+          switch(edge.type) {
+            case 'investment':
+              edgeColor = `rgba(255, 215, 0, ${edge.strength * 0.8})` // Gold
+              break
+            case 'partnership':
+              edgeColor = `rgba(0, 206, 209, ${edge.strength * 0.7})` // Cyan
+              break
+            case 'accelerator':
+              edgeColor = `rgba(34, 197, 94, ${edge.strength * 0.6})` // Green
+              break
+            default:
+              edgeColor = `rgba(255, 215, 0, ${edge.strength * 0.4})` // Default gold
+          }
+          
           ctx.beginPath()
           ctx.moveTo(x1, y1)
           ctx.lineTo(x2, y2)
-          ctx.strokeStyle = `rgba(255, 215, 0, ${edge.strength * 0.6})`
-          ctx.lineWidth = edge.strength * 3
+          ctx.strokeStyle = edgeColor
+          ctx.lineWidth = edge.strength * 4
           ctx.stroke()
         }
       })
       
-      // Draw nodes
+      // Draw nodes as colored globes
       NETWORK_DATA.nodes.forEach(node => {
         const x = (node.id % 10) * 80 + 40
         const y = Math.floor(node.id / 10) * 80 + 40
         
-        // Node background
+        // Calculate node size based on connections
+        const nodeSize = Math.max(15, Math.min(35, node.connections / 20))
+        
+        // Determine node color based on industry/role
+        let nodeColor
+        if (node.title.includes('CEO') || node.title.includes('Founder')) {
+          nodeColor = '#FFD700' // Gold for leaders
+        } else if (node.title.includes('Engineer') || node.title.includes('CTO')) {
+          nodeColor = '#00CED1' // Cyan for tech
+        } else if (node.title.includes('Sales') || node.title.includes('VP')) {
+          nodeColor = '#34D1BE' // Teal for business
+        } else if (node.title.includes('Investor') || node.title.includes('Partner')) {
+          nodeColor = '#FF6B6B' // Red for investors
+        } else if (node.title.includes('Product') || node.title.includes('Design')) {
+          nodeColor = '#4ECDC4' // Mint for product
+        } else {
+          nodeColor = '#A8E6CF' // Light green for others
+        }
+        
+        // Draw globe with gradient effect
+        const gradient = ctx.createRadialGradient(x, y, 0, x, y, nodeSize)
+        gradient.addColorStop(0, nodeColor)
+        gradient.addColorStop(0.7, nodeColor)
+        gradient.addColorStop(1, `${nodeColor}80`)
+        
         ctx.beginPath()
-        ctx.arc(x, y, 20, 0, 2 * Math.PI)
-        ctx.fillStyle = selectedNode?.id === node.id ? '#FFD700' : '#00CED1'
+        ctx.arc(x, y, nodeSize, 0, 2 * Math.PI)
+        ctx.fillStyle = selectedNode?.id === node.id ? '#FFD700' : gradient
         ctx.fill()
         
-        // Node text
-        ctx.fillStyle = '#000'
-        ctx.font = '16px Arial'
-        ctx.textAlign = 'center'
-        ctx.fillText(node.avatar, x, y + 6)
+        // Add highlight for selected node
+        if (selectedNode?.id === node.id) {
+          ctx.beginPath()
+          ctx.arc(x, y, nodeSize + 5, 0, 2 * Math.PI)
+          ctx.strokeStyle = '#FFD700'
+          ctx.lineWidth = 3
+          ctx.stroke()
+        }
         
         // Hover effect
         if (hoveredNode?.id === node.id) {
           ctx.beginPath()
-          ctx.arc(x, y, 30, 0, 2 * Math.PI)
+          ctx.arc(x, y, nodeSize + 8, 0, 2 * Math.PI)
           ctx.strokeStyle = '#FFD700'
           ctx.lineWidth = 2
           ctx.stroke()
+          
+          // Show node info on hover
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.9)'
+          ctx.fillRect(x + 15, y - 30, 120, 60)
+          ctx.fillStyle = '#FFD700'
+          ctx.font = '12px Arial'
+          ctx.textAlign = 'left'
+          ctx.fillText(node.name, x + 20, y - 15)
+          ctx.fillStyle = '#FFFFFF'
+          ctx.font = '10px Arial'
+          ctx.fillText(node.title, x + 20, y)
+          ctx.fillText(node.value, x + 20, y + 15)
         }
       })
       
@@ -375,7 +493,7 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto">
+    <div className="w-full max-w-7xl mx-auto">
       {/* LinkedIn Profile Input */}
       <div className="bg-os-darker/50 rounded-lg p-6 mb-8 border border-synergy-gold/30">
         <h3 className="text-xl font-bold text-synergy-gold mb-4">Connect Your LinkedIn Profile</h3>
@@ -476,9 +594,208 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
         )}
       </div>
 
+      {/* Analysis Progress */}
+      {isAnalyzing && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-os-darker/50 rounded-lg p-6 mb-8 border border-depth-cyan/30"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold text-depth-cyan">Network Intelligence Analysis</h3>
+            <div className="text-connection-green font-mono">{analysisProgress.toFixed(0)}%</div>
+          </div>
+          <div className="mb-4">
+            <div className="w-full bg-os-dark rounded-full h-2">
+              <motion.div
+                className="bg-gradient-to-r from-depth-cyan to-connection-green h-2 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${analysisProgress}%` }}
+                transition={{ duration: 0.5 }}
+              />
+            </div>
+          </div>
+          <p className="text-interface-light">{currentAnalysisStep}</p>
+        </motion.div>
+      )}
+
+      {/* Network Intelligence Dashboard */}
+      {insights.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="grid lg:grid-cols-3 gap-8 mb-8"
+        >
+          {/* Network Metrics */}
+          <div className="bg-os-darker/50 rounded-lg p-6 border border-synergy-gold/30">
+            <h3 className="text-xl font-bold text-synergy-gold mb-4">Network Metrics</h3>
+            <div className="space-y-4">
+              <div className="flex justify-between">
+                <span className="text-interface-light">Total Connections:</span>
+                <span className="text-synergy-gold font-mono">{networkMetrics.totalConnections.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-interface-light">Average Value:</span>
+                <span className="text-synergy-gold font-mono">${networkMetrics.averageValue.toFixed(0)}K</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-interface-light">Network Density:</span>
+                <span className="text-synergy-gold font-mono">87%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-interface-light">Synergy Score:</span>
+                <span className="text-connection-green font-mono">94/100</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Top Industries */}
+          <div className="bg-os-darker/50 rounded-lg p-6 border border-depth-cyan/30">
+            <h3 className="text-xl font-bold text-depth-cyan mb-4">Top Industries</h3>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-interface-light">Technology</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-16 bg-os-dark rounded-full h-2">
+                    <div className="bg-depth-cyan h-2 rounded-full" style={{ width: '85%' }} />
+                  </div>
+                  <span className="text-depth-cyan text-sm font-mono">85%</span>
+                </div>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-interface-light">Finance</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-16 bg-os-dark rounded-full h-2">
+                    <div className="bg-depth-cyan h-2 rounded-full" style={{ width: '70%' }} />
+                  </div>
+                  <span className="text-depth-cyan text-sm font-mono">70%</span>
+                </div>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-interface-light">Healthcare</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-16 bg-os-dark rounded-full h-2">
+                    <div className="bg-depth-cyan h-2 rounded-full" style={{ width: '55%' }} />
+                  </div>
+                  <span className="text-depth-cyan text-sm font-mono">55%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Skill Gaps */}
+          <div className="bg-os-darker/50 rounded-lg p-6 border border-connection-green/30">
+            <h3 className="text-xl font-bold text-connection-green mb-4">Skill Gaps</h3>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-interface-light">AI/ML</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-16 bg-os-dark rounded-full h-2">
+                    <div className="bg-connection-green h-2 rounded-full" style={{ width: '70%' }} />
+                  </div>
+                  <span className="text-connection-green text-sm font-mono">70%</span>
+                </div>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-interface-light">Data Science</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-16 bg-os-dark rounded-full h-2">
+                    <div className="bg-connection-green h-2 rounded-full" style={{ width: '60%' }} />
+                  </div>
+                  <span className="text-connection-green text-sm font-mono">60%</span>
+                </div>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-interface-light">Product Management</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-16 bg-os-dark rounded-full h-2">
+                    <div className="bg-connection-green h-2 rounded-full" style={{ width: '50%' }} />
+                  </div>
+                  <span className="text-connection-green text-sm font-mono">50%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Network Intelligence Dashboard */}
+      {insights.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="grid lg:grid-cols-3 gap-8 mb-8"
+        >
+          {/* Network Metrics */}
+          <div className="bg-os-darker/50 rounded-lg p-6 border border-synergy-gold/30">
+            <h3 className="text-xl font-bold text-synergy-gold mb-4">Network Metrics</h3>
+            <div className="space-y-4">
+              <div className="flex justify-between">
+                <span className="text-interface-light">Total Connections:</span>
+                <span className="text-synergy-gold font-mono">{networkMetrics.totalConnections.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-interface-light">Average Value:</span>
+                <span className="text-synergy-gold font-mono">${networkMetrics.averageValue.toFixed(0)}K</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-interface-light">Network Density:</span>
+                <span className="text-synergy-gold font-mono">87%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-interface-light">Synergy Score:</span>
+                <span className="text-connection-green font-mono">94/100</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Top Industries */}
+          <div className="bg-os-darker/50 rounded-lg p-6 border border-depth-cyan/30">
+            <h3 className="text-xl font-bold text-depth-cyan mb-4">Top Industries</h3>
+            <div className="space-y-3">
+              {networkMetrics.topIndustries.map((industry, index) => (
+                <div key={industry} className="flex justify-between items-center">
+                  <span className="text-interface-light">{industry}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-16 bg-os-dark rounded-full h-2">
+                      <div 
+                        className="bg-depth-cyan h-2 rounded-full" 
+                        style={{ width: `${85 - index * 15}%` }}
+                      />
+                    </div>
+                    <span className="text-depth-cyan text-sm font-mono">{85 - index * 15}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Skill Gaps */}
+          <div className="bg-os-darker/50 rounded-lg p-6 border border-connection-green/30">
+            <h3 className="text-xl font-bold text-connection-green mb-4">Skill Gaps</h3>
+            <div className="space-y-3">
+              {networkMetrics.skillGaps.map((skill, index) => (
+                <div key={skill} className="flex justify-between items-center">
+                  <span className="text-interface-light">{skill}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-16 bg-os-dark rounded-full h-2">
+                      <div 
+                        className="bg-connection-green h-2 rounded-full" 
+                        style={{ width: `${70 - index * 10}%` }}
+                      />
+                    </div>
+                    <span className="text-connection-green text-sm font-mono">{70 - index * 10}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Network Visualization */}
       <div className="bg-os-darker/30 rounded-lg p-6 mb-8 border border-depth-cyan/30">
-        <h3 className="text-xl font-bold text-depth-cyan mb-4">Your Network Intelligence</h3>
+        <h3 className="text-xl font-bold text-depth-cyan mb-4">Network Intelligence Visualization</h3>
         <div className="relative">
           <canvas
             ref={canvasRef}
@@ -493,6 +810,33 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
               <div>Nodes: {NETWORK_DATA.nodes.length}</div>
               <div>Connections: {NETWORK_DATA.edges.length}</div>
               <div>Total Value: $47.2M</div>
+            </div>
+          </div>
+          
+          {/* Network Legend */}
+          <div className="absolute bottom-4 left-4 bg-os-darker/90 backdrop-blur-sm rounded p-3 border border-synergy-gold/30">
+            <div className="text-sm text-interface-light mb-2 font-semibold">Network Legend</div>
+            <div className="space-y-1 text-xs">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                <span>Leaders (CEO/Founder)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-cyan-400"></div>
+                <span>Tech (Engineer/CTO)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-teal-400"></div>
+                <span>Business (Sales/VP)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                <span>Investors</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-mint-400"></div>
+                <span>Product/Design</span>
+              </div>
             </div>
           </div>
         </div>
@@ -531,18 +875,31 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
             animate={{ opacity: 1, y: 0 }}
             className="space-y-4"
           >
-            <h3 className="text-xl font-bold text-connection-green">Network Insights</h3>
+            <h3 className="text-xl font-bold text-connection-green">Strategic Network Insights</h3>
             {insights.map((insight, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-os-darker/50 rounded-lg p-4 border border-connection-green/30"
+                className="bg-os-darker/50 rounded-lg p-6 border border-connection-green/30"
               >
-                <h4 className="font-bold text-connection-green mb-2">{insight.title}</h4>
-                <p className="text-interface-light mb-2">{insight.description}</p>
-                <p className="text-synergy-gold font-semibold mb-3">{insight.value}</p>
+                <div className="flex justify-between items-start mb-4">
+                  <h4 className="font-bold text-connection-green text-lg">{insight.title}</h4>
+                  <div className="flex items-center gap-2">
+                    <span className="text-interface-light text-sm">Confidence:</span>
+                    <span className="text-connection-green font-mono">{insight.confidence}%</span>
+                    <span className={`px-2 py-1 rounded text-xs ${
+                      insight.priority === 'critical' ? 'bg-red-500/20 text-red-400' :
+                      insight.priority === 'high' ? 'bg-orange-500/20 text-orange-400' :
+                      'bg-blue-500/20 text-blue-400'
+                    }`}>
+                      {insight.priority.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+                <p className="text-interface-light mb-3">{insight.description}</p>
+                <p className="text-synergy-gold font-semibold mb-4">{insight.value}</p>
                 <div className="flex flex-wrap gap-2">
                   {insight.connections.slice(0, 3).map((connection: any) => (
                     <span key={connection.id} className="bg-connection-green/20 text-connection-green px-2 py-1 rounded text-sm">
