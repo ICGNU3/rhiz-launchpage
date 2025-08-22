@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
 import TypewriterText from '../components/TypewriterText'
 import ConversationalAgent from '../components/ConversationalAgent'
+import NetworkVisualizer from '../components/NetworkVisualizer'
 
 // Mobile detection hook
 const useIsMobile = () => {
@@ -49,7 +50,7 @@ export default function Home() {
                 Technology
               </a>
               <a href="#demo" className="text-interface-light hover:text-synergy-gold transition-colors">
-                Demo
+                Network Demo
               </a>
               <a 
                 href="/root-alpha" 
@@ -308,19 +309,39 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Demo Section */}
+      {/* Network Intelligence Demo */}
       <section id="demo" className="py-16 px-4 sm:px-6 lg:px-8 bg-os-darker/50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className={`font-bold mb-6 ${
               isMobile ? 'text-3xl' : 'text-4xl sm:text-5xl'
             }`}>
-              <span className="screen-light">Experience RHIZ AI</span>
+              <span className="screen-light">Network Intelligence Demo</span>
             </h2>
             <p className={`text-interface-light max-w-3xl mx-auto ${
               isMobile ? 'text-lg' : 'text-xl'
             }`}>
-              Try our AI relationship intelligence system. Ask about networking, synergies, or business opportunities.
+              See how RHIZ analyzes your network and finds hidden opportunities. Enter your goals and skills to get personalized insights.
+            </p>
+          </div>
+          
+          <NetworkVisualizer />
+        </div>
+      </section>
+
+      {/* AI Chat Demo */}
+      <section id="ai-chat" className="py-16 px-4 sm:px-6 lg:px-8 bg-os-darker/30">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className={`font-bold mb-6 ${
+              isMobile ? 'text-3xl' : 'text-4xl sm:text-5xl'
+            }`}>
+              <span className="screen-light">Chat with RHIZ AI</span>
+            </h2>
+            <p className={`text-interface-light max-w-3xl mx-auto ${
+              isMobile ? 'text-lg' : 'text-xl'
+            }`}>
+              Ask our AI about networking strategies, business opportunities, or relationship building.
             </p>
           </div>
           
