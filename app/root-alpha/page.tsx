@@ -442,9 +442,36 @@ export default function Home() {
 
   return (
     <div key={componentKey} className="bg-os-dark os-grid screen-flicker">
-      {/* Navigation */}
+      {/* Navigation with Status Bar */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-os-darker/90 backdrop-blur-md border-b border-os-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Status Bar */}
+          <div className="py-1 flex items-center justify-between">
+            <div className="flex items-center gap-2 md:gap-4">
+              <div className="font-mono text-xs md:text-sm text-synergy-gold">
+                {isMobile ? 'RHIZ' : 'RELATIONAL_OS'}
+              </div>
+              <div className="text-xs text-interface-light">v.150</div>
+            </div>
+            
+            <div className="flex items-center gap-2 md:gap-6">
+              {!isMobile && (
+                <>
+                  <div className="text-xs font-mono text-depth-cyan">
+                    NETWORK_DEPTH: SCANNING...
+                  </div>
+                  <div className="text-xs font-mono text-connection-green">
+                    SYNERGIES: ACTIVE
+                  </div>
+                </>
+              )}
+              <div className="text-xs font-mono text-alert-magenta animate-pulse">
+                ACCESS GRANTED
+              </div>
+            </div>
+          </div>
+          
+          {/* Main Navigation */}
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-synergy-gold rounded-full flex items-center justify-center">
@@ -489,38 +516,10 @@ export default function Home() {
 
       
       {/* Sticky CTA */}
-              <StickyCTA />
-
-      {/* OS Status Bar - Mobile Optimized */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-os-darker/95 backdrop-blur-md border-b border-os-border">
-        <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
-          <div className="flex items-center gap-2 md:gap-4">
-            <div className="font-mono text-xs md:text-sm text-synergy-gold">
-              {isMobile ? 'RHIZ' : 'RELATIONAL_OS'}
-            </div>
-            <div className="text-xs text-interface-light">v.150</div>
-          </div>
-          
-          <div className="flex items-center gap-2 md:gap-6">
-            {!isMobile && (
-              <>
-                <div className="text-xs font-mono text-depth-cyan">
-                  NETWORK_DEPTH: SCANNING...
-                </div>
-                <div className="text-xs font-mono text-connection-green">
-                  SYNERGIES: ACTIVE
-                </div>
-              </>
-            )}
-            <div className="text-xs font-mono text-alert-magenta animate-pulse">
-              ACCESS GRANTED
-            </div>
-          </div>
-        </div>
-      </div>
+      <StickyCTA />
 
       {/* Hero Section - Mobile-First Responsive Control Room */}
-      <section className="hero-section min-h-screen relative bg-gradient-to-br from-os-dark via-os-darker to-os-dark w-full pt-16">
+      <section className="hero-section min-h-screen relative bg-gradient-to-br from-os-dark via-os-darker to-os-dark w-full pt-24">
         {/* Multi-Layer Animated Backgrounds - Optimized for Mobile */}
         <div className="absolute inset-0">
           {/* Primary Grid - Responsive Density */}
@@ -602,7 +601,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto relative z-10 min-h-screen flex flex-col px-4">
           {/* Floating Status Panels - Hidden on Mobile */}
           {!isMobile && (
-            <div className="absolute z-20 top-16 left-4 right-4">
+            <div className="absolute z-20 top-24 left-4 right-4">
               <div className="flex justify-between items-start">
               {/* System Status HUD */}
               <motion.div 
@@ -641,9 +640,9 @@ export default function Home() {
           )}
           
           {/* Central Command Header - Mobile First */}
-                      <div className={`text-center flex-grow flex flex-col justify-center ${
-              isMobile ? 'mt-20 mb-6 px-2' : 'mt-32 mb-8'
-            }`}>
+          <div className={`text-center flex-grow flex flex-col justify-center ${
+            isMobile ? 'mt-20 mb-6 px-2' : 'mt-40 mb-8'
+          }`}>
               {/* Holographic Title Display - Responsive */}
               <motion.div 
                 className={`relative ${
