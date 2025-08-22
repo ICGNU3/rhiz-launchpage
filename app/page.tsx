@@ -256,7 +256,7 @@ const StickyCTA = () => {
     <div className={`sticky-cta ${isVisible ? 'visible' : ''}`}>
       <div className="bg-synergy-gold text-os-dark px-6 py-3 rounded-lg shadow-lg">
         <div className="text-sm font-bold">
-          EXCLUSIVE ACCESS
+          JOIN NOW
         </div>
         <button 
           type="button" 
@@ -660,7 +660,7 @@ export default function Home() {
                 />
                 <br/>
                 <TypewriterText 
-                  text="You've been personally selected for early access."
+                  text="Join the first 150 relationship intelligence pioneers."
                   delay={5000}
                   speed={40}
                   className="text-connection-green"
@@ -675,7 +675,7 @@ export default function Home() {
               )}
             </div>
 
-            {/* Mega CTA - Mobile Optimized */}
+            {/* Hero Status - Mobile Optimized */}
             <motion.div 
               className={`relative ${
                 isMobile ? 'mb-32' : 'mb-48'
@@ -685,42 +685,22 @@ export default function Home() {
               transition={{ delay: 5, duration: 0.8 }}
             >
               <div className="absolute inset-0 bg-synergy-gold/20 rounded-2xl blur-xl animate-pulse"></div>
-              <button 
-                ref={installButtonRef}
-                type="button" 
-                data-action="install"
-                onClick={() => window.open('https://buy.stripe.com/bJebJ0dgNcroeswgBvasg00', '_blank')}
-                className={`relative button-glow bg-gradient-to-r from-synergy-gold to-synergy-light text-os-dark font-bold rounded-2xl hover:from-synergy-light hover:to-synergy-gold transition-all duration-300 transform hover:scale-105 focus:ring-4 focus:ring-synergy-light/50 focus:ring-offset-2 focus:ring-offset-os-dark shadow-2xl ${
-                  isMobile 
-                    ? 'px-8 py-6 text-xl w-full max-w-sm mx-auto block' 
-                    : 'px-16 py-8 text-2xl md:text-3xl'
-                }`}
-                aria-label="Join the first 150 founding members for $777 lifetime license"
-              >
-                <div className={`flex items-center justify-center ${
-                  isMobile ? 'gap-2 flex-col' : 'gap-4'
+              
+              <div className={`relative bg-os-darker/80 backdrop-blur-sm border border-synergy-gold/30 rounded-2xl p-6 ${
+                isMobile ? 'text-center' : 'text-center'
+              }`}>
+                <div className={`text-interface-light ${
+                  isMobile ? 'text-sm' : 'text-lg'
                 }`}>
-                  <span className={isMobile ? 'text-lg' : ''}>ACCEPT INVITATION</span>
-                  <div className={`bg-os-dark/20 rounded-lg ${
-                    isMobile ? 'px-3 py-1 text-lg' : 'px-4 py-2'
-                  }`}>
-                    <span className="font-mono">$777</span>
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <span className="w-2 h-2 bg-connection-green rounded-full animate-pulse"></span>
+                    <span className="font-mono">SYSTEM STATUS: OPERATIONAL</span>
+                  </div>
+                  <div className="text-synergy-gold font-semibold">
+                    PERSONALLY SELECTED • LIFETIME ACCESS
                   </div>
                 </div>
-              </button>
-              
-              <motion.div 
-                className={`text-interface-light ${
-                  isMobile ? 'mt-4 text-sm text-center' : 'mt-6 text-lg'
-                }`}
-                animate={{ opacity: [0.7, 1, 0.7] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                {isMobile 
-                  ? 'PERSONALLY SELECTED • LIFETIME ACCESS'
-                  : 'PERSONALLY SELECTED • LIFETIME ACCESS • FOUNDING MEMBER'
-                }
-              </motion.div>
+              </div>
               
               {!isMobile && (
                 <div className="mt-4 flex justify-center items-center gap-8 text-sm text-interface-gray">
@@ -1410,7 +1390,7 @@ export default function Home() {
             <span className={`font-mono text-alert-magenta font-semibold ${
               isMobile ? 'text-sm' : ''
             }`}>
-              PERSONAL INVITATION: EXCLUSIVE ACCESS
+              FINAL OPPORTUNITY
             </span>
           </div>
           
@@ -1418,15 +1398,14 @@ export default function Home() {
             isMobile ? 'text-2xl mb-6' : 'text-4xl sm:text-5xl mb-8'
           }`}>
             <span className="screen-light">
-              {isMobile ? 'YOUR EXCLUSIVE INVITATION' : 'YOUR EXCLUSIVE INVITATION AWAITS'}
+              {isMobile ? 'READY TO JOIN?' : 'READY TO JOIN THE ELITE?'}
             </span>
           </h2>
           
           <p className={`text-os-light max-w-3xl mx-auto leading-relaxed ${
             isMobile ? 'text-lg mb-6 px-2' : 'text-xl sm:text-2xl mb-8'
           }`}>
-            You've been handpicked to join an elite group of 150 relationship pioneers. 
-            <span className="text-synergy-gold font-semibold"> The question isn't whether Root Alpha is worth $777. The question is: Can you afford to compete without it?</span>
+            <span className="text-synergy-gold font-semibold"> The question isn't whether RHIZ is worth $777. The question is: Can you afford to compete without it?</span>
           </p>
           
           <div className="space-y-6">
