@@ -264,7 +264,7 @@ const StickyCTA = () => {
           onClick={() => window.open('https://buy.stripe.com/bJebJ0dgNcroeswgBvasg00', '_blank')}
           style={{ minHeight: '44px', minWidth: '120px' }}
         >
-          ACCEPT INVITATION →
+          JOIN NOW →
         </button>
       </div>
     </div>
@@ -877,33 +877,7 @@ export default function Home() {
               transition={{ delay: 6.6, duration: 0.8 }}
             >
               <div className="text-center space-y-3">
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-2 h-2 bg-synergy-gold rounded-full animate-pulse"></div>
-                  <span className="font-mono text-synergy-gold font-bold text-xs">INVITATION</span>
-                </div>
-                
-                <button 
-                  onClick={() => window.open('https://buy.stripe.com/bJebJ0dgNcroeswgBvasg00', '_blank')}
-                  className={`button-glow bg-gradient-to-r from-synergy-gold to-synergy-light text-os-dark font-bold rounded-lg hover:from-synergy-light hover:to-synergy-gold transition-all duration-300 transform hover:scale-105 focus:ring-4 focus:ring-synergy-light/50 focus:ring-offset-2 focus:ring-offset-os-dark shadow-2xl touch-manipulation ${
-                    isMobile ? 'px-6 py-4 text-base w-full' : 'px-8 py-4 text-base'
-                  }`}
-                  style={{ minHeight: '56px' }}
-                >
-                  ACCEPT INVITATION
-                </button>
-                
-                <div className="text-xs text-interface-light">
-                  Limited time access
-                </div>
-                
-                <div className="w-full bg-os-dark rounded-full h-2">
-                  <motion.div 
-                    className="bg-gradient-to-r from-synergy-gold to-depth-cyan h-2 rounded-full"
-                    initial={{ width: "0%" }}
-                    animate={{ width: "75%" }}
-                    transition={{ duration: 2, ease: "easeOut" }}
-                  />
-                </div>
+
               </div>
             </motion.div>
           </div>
