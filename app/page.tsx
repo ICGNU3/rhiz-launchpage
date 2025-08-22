@@ -441,7 +441,7 @@ export default function Home() {
   }, [])
 
   return (
-    <div key={componentKey} className="min-h-screen bg-os-dark os-grid screen-flicker">
+    <div key={componentKey} className="bg-os-dark os-grid screen-flicker">
 
       
       {/* Sticky CTA */}
@@ -476,7 +476,7 @@ export default function Home() {
       </div>
 
       {/* Hero Section - Mobile-First Responsive Control Room */}
-      <section className="min-h-screen relative overflow-hidden bg-gradient-to-br from-os-dark via-os-darker to-os-dark w-full">
+      <section className="hero-section min-h-screen relative bg-gradient-to-br from-os-dark via-os-darker to-os-dark w-full">
         {/* Multi-Layer Animated Backgrounds - Optimized for Mobile */}
         <div className="absolute inset-0">
           {/* Primary Grid - Responsive Density */}
@@ -555,7 +555,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto relative z-10 min-h-screen flex flex-col px-4 overflow-x-hidden">
+        <div className="max-w-7xl mx-auto relative z-10 min-h-screen flex flex-col px-4">
           {/* Floating Status Panels - Hidden on Mobile */}
           {!isMobile && (
             <div className="absolute z-20 top-16 left-4 right-4">

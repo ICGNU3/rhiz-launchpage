@@ -46,7 +46,7 @@ body::before {
       rgba(0, 255, 255, 0.03) 4px
     );
   pointer-events: none;
-  z-index: 1000;
+  z-index: 1;
   animation: scanlines 0.1s linear infinite;
   /* Reduce on mobile for performance */
   opacity: 1;
@@ -118,6 +118,18 @@ body::before {
   .fixed, [style*="position: fixed"] {
     /* Ensure fixed elements don't block scrolling */
     pointer-events: auto;
+  }
+
+  /* Fix scrolling issues with sections */
+  section {
+    /* Ensure sections don't block scrolling */
+    overflow: visible !important;
+  }
+
+  /* Fix hero section scrolling */
+  .hero-section {
+    /* Remove any overflow restrictions */
+    overflow: visible !important;
   }
 }
 
