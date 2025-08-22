@@ -130,6 +130,7 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
 
   // Enhanced extraction toggle
   const [useEnhancedExtraction, setUseEnhancedExtraction] = useState(false)
+  const [useRealNetworkAnalysis, setUseRealNetworkAnalysis] = useState(false)
   
   // Extract profile data from LinkedIn URL
   const extractLinkedInProfile = useCallback(async () => {
@@ -199,7 +200,7 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
   }, [userProfile.linkedinUrl])
 
   // Generate insights based on user profile
-  const generateInsights = useCallback(() => {
+  const generateInsights = useCallback(async () => {
     setIsAnalyzing(true)
     setAnalysisProgress(0)
     setCurrentAnalysisStep('Initializing network analysis...')
@@ -223,7 +224,88 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
       if (currentStep >= steps.length) {
         clearInterval(progressInterval)
         
-        setTimeout(() => {
+        // Use real network analysis if enabled
+        if (useRealNetworkAnalysis) {
+          performRealNetworkAnalysis()
+        } else {
+          performMockAnalysis()
+        }
+      }
+    }, 800)
+  }, [userProfile, useRealNetworkAnalysis])
+
+  const performRealNetworkAnalysis = async () => {
+    try {
+      const response = await fetch('/api/network-analysis', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userProfile,
+          networkData: NETWORK_DATA
+        })
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        const analysis = result.analysis
+        
+        const newInsights = [
+          {
+            type: 'network_analysis',
+            title: 'Network Intelligence',
+            description: `Real-time analysis of ${analysis.totalConnections.toLocaleString()} connections`,
+            value: `$${(analysis.averageValue / 1000000).toFixed(1)}M average value`,
+            connections: NETWORK_DATA.nodes.slice(0, 5),
+            confidence: analysis.synergyScore,
+            priority: 'critical'
+          },
+          {
+            type: 'opportunities',
+            title: 'Strategic Opportunities',
+            description: analysis.opportunities.slice(0, 2).join(', '),
+            value: `${analysis.networkDensity}% network density`,
+            connections: [],
+            confidence: 92,
+            priority: 'high'
+          },
+          {
+            type: 'recommendations',
+            title: 'AI Recommendations',
+            description: analysis.recommendations.slice(0, 2).join(', '),
+            value: `${analysis.skillGaps.length} skill gaps identified`,
+            connections: [],
+            confidence: 88,
+            priority: 'medium'
+          }
+        ]
+        
+        setInsights(newInsights)
+        
+        // Update network metrics with real data
+        setNetworkMetrics({
+          totalConnections: analysis.totalConnections,
+          averageValue: analysis.averageValue,
+          topIndustries: analysis.topIndustries,
+          skillGaps: analysis.skillGaps,
+          opportunities: analysis.opportunities
+        })
+        
+        console.log('Real network analysis completed:', result.source)
+      } else {
+        throw new Error('Network analysis failed')
+      }
+    } catch (error) {
+      console.warn('Real network analysis failed, falling back to mock:', error)
+      performMockAnalysis()
+    } finally {
+      setIsAnalyzing(false)
+    }
+  }
+
+  const performMockAnalysis = () => {
+    setTimeout(() => {
           const newInsights = []
           
           // Match skills to network
@@ -305,8 +387,6 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
           }
         }, 1000)
       }
-    }, 800)
-  }, [userProfile, onInsightGenerated])
 
   // Calculate network metrics when insights are generated
   useEffect(() => {
@@ -380,27 +460,41 @@ export default function NetworkVisualizer({ userGoals = [], userSkills = [], onI
               onChange={(e) => setUserProfile(prev => ({ ...prev, linkedinUrl: e.target.value }))}
             />
           </div>
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            {/* Enhanced Extraction Toggle */}
-            <button
-              onClick={() => setUseEnhancedExtraction(!useEnhancedExtraction)}
-              className={`px-4 py-2 rounded font-semibold text-sm border transition-colors ${
-                useEnhancedExtraction 
-                  ? 'bg-connection-green/20 border-connection-green text-connection-green' 
-                  : 'bg-os-dark border-depth-cyan/30 text-interface-light hover:border-depth-cyan'
-              }`}
-              title={useEnhancedExtraction ? 'Enhanced extraction enabled' : 'Enable enhanced extraction'}
-            >
-              {useEnhancedExtraction ? '🔍 Enhanced' : '⚡ Basic'}
-            </button>
-            <button
-              onClick={extractLinkedInProfile}
-              disabled={!userProfile.linkedinUrl || isExtracting}
-              className="w-full sm:w-auto bg-synergy-gold text-os-dark px-6 py-3 sm:py-2 rounded font-semibold hover:bg-synergy-light transition-colors disabled:opacity-50 text-base min-h-[44px]"
-            >
-              {isExtracting ? 'Extracting Profile...' : 'Extract Profile'}
-            </button>
-          </div>
+                         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                 {/* Enhanced Extraction Toggle */}
+                 <button
+                   onClick={() => setUseEnhancedExtraction(!useEnhancedExtraction)}
+                   className={`px-4 py-2 rounded font-semibold text-sm border transition-colors ${
+                     useEnhancedExtraction 
+                       ? 'bg-connection-green/20 border-connection-green text-connection-green' 
+                       : 'bg-os-dark border-depth-cyan/30 text-interface-light hover:border-depth-cyan'
+                   }`}
+                   title={useEnhancedExtraction ? 'Enhanced extraction enabled' : 'Enable enhanced extraction'}
+                 >
+                   {useEnhancedExtraction ? '🔍 Enhanced' : '⚡ Basic'}
+                 </button>
+                 
+                 {/* Network Analysis Toggle */}
+                 <button
+                   onClick={() => setUseRealNetworkAnalysis(!useRealNetworkAnalysis)}
+                   className={`px-4 py-2 rounded font-semibold text-sm border transition-colors ${
+                     useRealNetworkAnalysis 
+                       ? 'bg-alert-magenta/20 border-alert-magenta text-alert-magenta' 
+                       : 'bg-os-dark border-depth-cyan/30 text-interface-light hover:border-depth-cyan'
+                   }`}
+                   title={useRealNetworkAnalysis ? 'Real network analysis enabled' : 'Enable real network analysis'}
+                 >
+                   {useRealNetworkAnalysis ? '🧠 Real AI' : '🤖 Mock AI'}
+                 </button>
+                 
+                 <button
+                   onClick={extractLinkedInProfile}
+                   disabled={!userProfile.linkedinUrl || isExtracting}
+                   className="w-full sm:w-auto bg-synergy-gold text-os-dark px-6 py-3 sm:py-2 rounded font-semibold hover:bg-synergy-light transition-colors disabled:opacity-50 text-base min-h-[44px]"
+                 >
+                   {isExtracting ? 'Extracting Profile...' : 'Extract Profile'}
+                 </button>
+               </div>
         </div>
         
         {/* Extracted Profile Preview */}
