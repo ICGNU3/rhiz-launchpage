@@ -178,6 +178,26 @@ body::before {
     hyphens: auto !important;
     max-width: 100% !important;
     display: inline-block !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  
+  /* Force text to stay within container */
+  .typewriter-container {
+    overflow: hidden !important;
+    max-width: 100% !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+  
+  /* Ensure hero text stays within bounds */
+  .hero-typewriter {
+    max-width: 100% !important;
+    overflow: hidden !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    -webkit-hyphens: auto !important;
+    hyphens: auto !important;
   }
   
   /* Ensure text containers don't overflow on mobile */

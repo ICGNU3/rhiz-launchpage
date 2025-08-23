@@ -52,7 +52,9 @@ export const TypewriterText = ({
         overflowWrap: 'break-word',
         hyphens: 'auto',
         maxWidth: '100%',
-        display: 'inline-block'
+        display: 'inline-block',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis'
       }}
     >
       {displayText}

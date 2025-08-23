@@ -174,13 +174,13 @@ export default function Home() {
             </motion.h1>
             
             <motion.div 
-              className="text-os-light leading-relaxed max-w-4xl mx-auto relative text-2xl sm:text-3xl mb-8"
+              className="text-os-light leading-relaxed max-w-2xl sm:max-w-3xl lg:max-w-4xl mx-auto relative text-lg sm:text-xl lg:text-2xl xl:text-3xl mb-8 px-4"
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.8 }}
             >
               <motion.div 
-                className="bg-os-darker/30 backdrop-blur-sm border border-synergy-gold/30 rounded-lg shadow-2xl p-6 hover:shadow-3xl hover:border-synergy-gold/50 transition-all duration-300 overflow-hidden"
+                className="bg-os-darker/30 backdrop-blur-sm border border-synergy-gold/30 rounded-lg shadow-2xl p-4 sm:p-6 hover:shadow-3xl hover:border-synergy-gold/50 transition-all duration-300 overflow-hidden"
                 whileHover={{ 
                   scale: 1.02,
                   rotateX: 2,
@@ -190,28 +190,36 @@ export default function Home() {
                 style={{
                   wordBreak: 'break-word',
                   overflowWrap: 'break-word',
-                  hyphens: 'auto'
+                  hyphens: 'auto',
+                  maxWidth: '100%',
+                  overflow: 'hidden'
                 }}
               >
-                <div className="space-y-4">
-                  <TypewriterText 
-                    text="Stop losing $2M+ opportunities because you forgot who knows who."
-                    delay={1000}
-                    speed={40}
-                    className="text-alert-magenta font-bold block"
-                  />
-                  <TypewriterText 
-                    text="RHIZ transforms your network into an intelligent relationship OS that never forgets and always connects."
-                    delay={3000}
-                    speed={35}
-                    className="text-synergy-gold font-semibold block"
-                  />
-                  <TypewriterText 
-                    text="Voice-first intelligence. Zero manual data entry. Maximum network ROI."
-                    delay={5000}
-                    speed={40}
-                    className="text-connection-green block"
-                  />
+                <div className="space-y-3 sm:space-y-4 typewriter-container">
+                  <div className="min-h-[1.5em] overflow-hidden hero-typewriter">
+                    <TypewriterText 
+                      text="Stop losing $2M+ opportunities because you forgot who knows who."
+                      delay={1000}
+                      speed={40}
+                      className="text-alert-magenta font-bold block break-words"
+                    />
+                  </div>
+                  <div className="min-h-[1.5em] overflow-hidden hero-typewriter">
+                    <TypewriterText 
+                      text="RHIZ transforms your network into an intelligent relationship OS that never forgets and always connects."
+                      delay={3000}
+                      speed={35}
+                      className="text-synergy-gold font-semibold block break-words"
+                    />
+                  </div>
+                  <div className="min-h-[1.5em] overflow-hidden hero-typewriter">
+                    <TypewriterText 
+                      text="Voice-first intelligence. Zero manual data entry. Maximum network ROI."
+                      delay={5000}
+                      speed={40}
+                      className="text-connection-green block break-words"
+                    />
+                  </div>
                 </div>
               </motion.div>
             </motion.div>
