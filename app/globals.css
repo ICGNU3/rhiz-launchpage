@@ -170,6 +170,23 @@ body::before {
     hyphens: auto;
   }
   
+  /* Enhanced TypewriterText mobile optimization */
+  .typewriter {
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    -webkit-hyphens: auto !important;
+    hyphens: auto !important;
+    max-width: 100% !important;
+    display: inline-block !important;
+  }
+  
+  /* Ensure text containers don't overflow on mobile */
+  .text-container, .typewriter-container {
+    overflow: hidden !important;
+    word-wrap: break-word !important;
+    max-width: 100% !important;
+  }
+  
   /* Ensure text containers don't overflow */
   .text-container {
     overflow: hidden;
@@ -341,6 +358,7 @@ body::before {
       0 0 40px rgba(0, 255, 255, 0.1),
       inset 0 0 20px rgba(0, 255, 255, 0.05);
     position: relative;
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
   }
   
@@ -643,6 +661,7 @@ body::before {
     
     /* Reduce blur effects for performance */
     .backdrop-blur-md {
+      -webkit-backdrop-filter: blur(8px);
       backdrop-filter: blur(8px);
     }
     

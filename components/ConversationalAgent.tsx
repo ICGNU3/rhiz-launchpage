@@ -2,6 +2,9 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import SuccessCelebration from './SuccessCelebration'
+import DelightfulLoader from './DelightfulLoader'
+import PlayfulError from './PlayfulError'
 
 interface Message {
   id: string
@@ -118,6 +121,13 @@ export const ConversationalAgent = () => {
   // Memory & Learning
   const [memoryContext, setMemoryContext] = useState<string[]>([])
   const [learningProgress, setLearningProgress] = useState(0)
+  
+  // Delightful UI States
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
+  const [showError, setShowError] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+  const [errorType, setErrorType] = useState<'network' | 'voice' | 'processing' | 'general'>('general')
   
   // Refs
   const recognitionRef = useRef<any>(null)
@@ -267,15 +277,17 @@ export const ConversationalAgent = () => {
             })
             .catch(error => {
               console.error('Microphone access error:', error)
-              // Provide user feedback for mobile permission issues
+              // Show playful error for microphone issues
               if (error.name === 'NotAllowedError') {
-                setMessages(prev => [...prev, {
-                  id: Date.now().toString(),
-                  text: "Microphone permission denied. Please enable microphone access in your browser settings to use voice features.",
-                  isUser: false,
-                  timestamp: new Date(),
-                  confidence: 100
-                }])
+                showErrorMessage(
+                  "I need access to your microphone to hear your brilliant insights! Please enable microphone permissions in your browser.",
+                  'voice'
+                )
+              } else {
+                showErrorMessage(
+                  "Having trouble accessing your microphone. Let's troubleshoot this together!",
+                  'voice'
+                )
               }
             })
         }
@@ -390,6 +402,18 @@ export const ConversationalAgent = () => {
     }
   }
 
+  // Delightful UI helpers
+  const showSuccessMessage = (message: string) => {
+    setSuccessMessage(message)
+    setShowSuccess(true)
+  }
+  
+  const showErrorMessage = (message: string, type: 'network' | 'voice' | 'processing' | 'general' = 'general') => {
+    setErrorMessage(message)
+    setErrorType(type)
+    setShowError(true)
+  }
+
   const handleUserMessage = async (text: string, confidence: number = 100) => {
     // Simulate entity and topic extraction
     const entities = extractEntities(text)
@@ -447,6 +471,13 @@ export const ConversationalAgent = () => {
       // Update relationship depth based on conversation quality
       setRelationshipDepth(prev => Math.min(100, prev + Math.random() * 5))
       setLearningProgress(prev => Math.min(100, prev + Math.random() * 3))
+      
+      // Show success celebration for meaningful responses
+      if (response.synergies && response.synergies.length > 0) {
+        showSuccessMessage(`🎯 Found ${response.synergies.length} potential synergies!`)
+      } else if (entities.length > 2) {
+        showSuccessMessage('✨ Successfully captured relationship intelligence!')
+      }
 
       // Play audio if available with mobile compatibility
       if (response.audioUrl && audioRef.current) {        
@@ -491,6 +522,12 @@ export const ConversationalAgent = () => {
       console.error('Error processing message:', error)
       setAIState('idle')
       setIsThinking(false)
+      
+      // Show playful error instead of just a message
+      showErrorMessage(
+        "I'm experiencing a temporary processing interruption. My relationship intelligence systems are recalibrating.",
+        'processing'
+      )
       
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -768,13 +805,10 @@ export const ConversationalAgent = () => {
         recognitionRef.current.start()
       } catch (error) {
         console.error('Error starting speech recognition:', error)
-        setMessages(prev => [...prev, {
-          id: Date.now().toString(),
-          text: "Voice recognition unavailable. Please type your message or check microphone permissions.",
-          isUser: false,
-          timestamp: new Date(),
-          confidence: 100
-        }])
+        showErrorMessage(
+          "Voice recognition is taking a quick break! You can still type your message while I get my ears back online.",
+          'voice'
+        )
       }
     }
   }
@@ -817,9 +851,18 @@ export const ConversationalAgent = () => {
     }
   }
 
-  // Show skeleton while loading
+  // Show delightful loader while loading
   if (isLoading) {
-    return <VoiceInterfaceSkeleton />
+    return (
+      <div className="w-full min-h-[400px] flex items-center justify-center bg-os-darker/50 backdrop-blur-md border border-synergy-gold/30 rounded-lg">
+        <DelightfulLoader 
+          type="neural"
+          message="Initializing relationship intelligence..."
+          size="lg"
+          color="gold"
+        />
+      </div>
+    )
   }
 
   return (
@@ -1399,6 +1442,25 @@ export const ConversationalAgent = () => {
           </motion.div>
         )}
       </div>
+      
+      {/* Delightful UI Components */}
+      <SuccessCelebration 
+        show={showSuccess}
+        message={successMessage}
+        type="confetti"
+        onComplete={() => setShowSuccess(false)}
+      />
+      
+      <PlayfulError 
+        show={showError}
+        message={errorMessage}
+        type={errorType}
+        onRetry={() => {
+          setShowError(false)
+          // Could retry last action here
+        }}
+        onDismiss={() => setShowError(false)}
+      />
     </div>
   )
   

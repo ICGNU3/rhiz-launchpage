@@ -45,7 +45,16 @@ export const TypewriterText = ({
   }, [currentIndex, text, speed, isStarted, onComplete])
 
   return (
-    <span className={`${className} ${currentIndex < text.length ? 'typewriter' : ''}`}>
+    <span 
+      className={`${className} ${currentIndex < text.length ? 'typewriter' : ''} break-words overflow-wrap-anywhere hyphens-auto`}
+      style={{
+        wordBreak: 'break-word',
+        overflowWrap: 'break-word',
+        hyphens: 'auto',
+        maxWidth: '100%',
+        display: 'inline-block'
+      }}
+    >
       {displayText}
     </span>
   )
