@@ -252,11 +252,11 @@ export default function Home() {
                   whileHover={{ scale: 1.2, rotate: 360 }}
                   transition={{ duration: 0.3 }}
                 >✓</motion.span>
-                <span className="font-semibold">30-Day Money-Back Guarantee</span>
+                <span className="font-semibold">90-Day Money-Back Guarantee</span>
               </motion.div>
-              <p className="text-sm text-os-light mt-2">
-                If RHIZ doesn't create 10x ROI in your first month, get a full refund.
-              </p>
+                              <p className="text-sm text-os-light mt-2">
+                  If RHIZ doesn't create 10x ROI in your first 90 days, get a full refund.
+                </p>
             </motion.div>
 
             <motion.div 
@@ -838,7 +838,7 @@ export default function Home() {
                   Join 150 Founding Members →
                 </a>
                 <div className="text-interface-light text-sm">
-                  One-time $777 • Lifetime access • 30-day guarantee
+                  One-time $777 • Lifetime access • 90-day guarantee
                 </div>
               </div>
             </div>
@@ -877,7 +877,7 @@ export default function Home() {
                     LIMITED TO 150 MEMBERS
                   </span>
                   <span className="bg-connection-green/20 text-connection-green px-4 py-2 rounded-full text-sm font-semibold">
-                    30-DAY GUARANTEE
+                    90-DAY GUARANTEE
                   </span>
                 </div>
               </div>
@@ -888,7 +888,7 @@ export default function Home() {
                 <span className="text-xl text-interface-light font-normal">/lifetime</span>
               </div>
               <div className="text-interface-light mb-8">
-                <span className="line-through text-interface-gray">$11,880 yearly value</span> 
+                <span className="line-through text-interface-gray">$1,188 yearly value</span> 
                 <span className="text-connection-green font-semibold ml-2">Save 93%</span>
               </div>
               
@@ -975,7 +975,7 @@ export default function Home() {
               </a>
               
               <p className="text-xs text-interface-gray mt-4">
-                One-time payment • Instant access • 30-day guarantee
+                One-time payment • Instant access • 90-day guarantee
               </p>
             </div>
           </div>
@@ -1038,7 +1038,7 @@ export default function Home() {
                 Zero Risk. Maximum Reward.
               </h3>
               <p className="text-interface-light mb-6">
-                Try RHIZ for 30 days. If it doesn't create 10x ROI through better relationships, 
+                Try RHIZ for 90 days. If it doesn't create 10x ROI through better relationships, 
                 get every penny back. No questions, no hassle.
               </p>
               
@@ -1054,7 +1054,7 @@ export default function Home() {
                 <div className="flex items-center justify-center gap-6 text-sm text-interface-light">
                   <div className="flex items-center gap-2">
                     <span className="text-connection-green">✓</span>
-                    <span>30-day guarantee</span>
+                    <span>90-day guarantee</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-connection-green">✓</span>
